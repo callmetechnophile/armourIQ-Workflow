@@ -1,4 +1,5 @@
 'use client';
+// Vercel deployment rebuild trigger
 
 import React, { useState, useEffect } from 'react';
 import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon } from 'lucide-react';

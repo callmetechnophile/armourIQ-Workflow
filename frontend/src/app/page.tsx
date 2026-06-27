@@ -38,7 +38,9 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (window.location.port === '3000') {
+      if (process.env.NEXT_PUBLIC_API_URL) {
+        setApiBase(process.env.NEXT_PUBLIC_API_URL);
+      } else if (window.location.port === '3000') {
         setApiBase('http://localhost:8000');
       } else {
         setApiBase('');

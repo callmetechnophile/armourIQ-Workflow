@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.routes.research import router as research_router
 
 app = FastAPI(
-    title="WorkflowGuide AI (ArmorIQ Secured)",
+    title="ArmourFlow AI (ArmorIQ Secured)",
     description="A cryptographically governed multi-agent engineering research system.",
     version="1.0.0"
 )

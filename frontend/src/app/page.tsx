@@ -165,7 +165,7 @@ export default function Home() {
         <div className="flex-1 flex flex-col justify-center items-center px-4 max-w-4xl mx-auto w-full z-10 pb-20 mt-4 text-center">
           {/* Header Title Block */}
           <div className="bg-zinc-950/90 text-slate-100 font-mono tracking-[0.25em] px-5 py-2.5 text-2xl md:text-3xl font-extrabold uppercase border border-zinc-800 rounded-sm shadow-xl max-w-lg w-full">
-            WORKFLOWGUIDE.AI
+            ARMOURFLOW AI
           </div>
 
           {/* Subtitle */}
@@ -344,7 +344,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-950/80 border border-zinc-850 p-4 rounded-lg backdrop-blur-md">
             <div>
               <div className="text-xs font-mono tracking-widest text-cyan-400 font-extrabold uppercase">
-                WorkflowGuide AI (ArmorIQ)
+                ArmourFlow AI (ArmorIQ)
               </div>
               <h2 className="text-sm font-bold text-slate-100 mt-1">
                 Engineering Spec: <span className="text-slate-300 italic">"{pipelineData.intent}"</span>

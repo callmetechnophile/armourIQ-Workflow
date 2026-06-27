@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WorkflowGuide AI (ArmorIQ Secured)",
+  title: "ArmourFlow AI (ArmorIQ Secured)",
   description: "Autonomous engineering intelligence platform governed cryptographically by ArmorIQ.",
 };
 

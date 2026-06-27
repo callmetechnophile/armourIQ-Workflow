@@ -304,7 +304,12 @@ export default function Home() {
 
           {/* Bottom Left Social links */}
           <div className="absolute bottom-6 left-6 flex items-center gap-2.5">
-            <a href="#" className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-400 hover:text-white transition-all">
+            <a 
+              href="https://www.linkedin.com/in/mr.devgenius" 
+              target="_blank" 
+              rel="noreferrer"
+              className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-400 hover:text-white transition-all"
+            >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>

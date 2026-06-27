@@ -34,6 +34,17 @@ export default function Home() {
   
   // Audio wave fluctuation simulation
   const [waveHeights, setWaveHeights] = useState<number[]>([15, 30, 20, 40, 10, 30]);
+  const [apiBase, setApiBase] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.location.port === '3000') {
+        setApiBase('http://localhost:8000');
+      } else {
+        setApiBase('');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let interval: any;
@@ -68,7 +79,7 @@ export default function Home() {
 
     try {
       // Fetch details from FastAPI backend
-      const response = await fetch('http://localhost:8000/api/research', {
+      const response = await fetch(`${apiBase}/api/research`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ intent: searchIntent })
@@ -401,7 +412,7 @@ export default function Home() {
             
             <div className="flex flex-wrap gap-3">
               <a
-                href={`http://localhost:8000${pipelineData.exports?.pdf?.url}`}
+                href={`${apiBase}${pipelineData.exports?.pdf?.url}`}
                 download
                 className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5 shadow-lg shadow-blue-500/10"
               >
@@ -409,7 +420,7 @@ export default function Home() {
                 Export PDF
               </a>
               <a
-                href={`http://localhost:8000${pipelineData.exports?.csv?.url}`}
+                href={`${apiBase}${pipelineData.exports?.csv?.url}`}
                 download
                 className="bg-slate-900 hover:bg-slate-800 border border-slate-850 text-slate-300 text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5"
               >
@@ -417,7 +428,7 @@ export default function Home() {
                 Export CSV
               </a>
               <a
-                href={`http://localhost:8000${pipelineData.exports?.markdown?.url}`}
+                href={`${apiBase}${pipelineData.exports?.markdown?.url}`}
                 download
                 className="bg-slate-900 hover:bg-slate-800 border border-slate-850 text-slate-300 text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5"
               >

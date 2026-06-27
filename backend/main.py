@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from backend.routes.research import router as research_router
 
 app = FastAPI(
@@ -33,6 +34,11 @@ def download_export(filename: str):
     # Return file response
     return FileResponse(file_path, filename=filename)
 
-@app.get("/")
-def read_root():
-    return {"status": "ONLINE", "framework": "FastAPI (ArmorIQ Secured)"}
+# Mount static files for Next.js frontend export
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(STATIC_DIR):
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+else:
+    @app.get("/")
+    def read_root():
+        return {"status": "ONLINE", "framework": "FastAPI (ArmorIQ Secured)"}

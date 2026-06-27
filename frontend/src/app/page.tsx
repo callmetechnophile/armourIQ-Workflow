@@ -308,7 +308,12 @@ export default function Home() {
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
             </a>
-            <a href="#" className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-400 hover:text-white transition-all">
+            <a 
+              href="https://www.linkedin.com/in/callmetechnophile" 
+              target="_blank" 
+              rel="noreferrer"
+              className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-400 hover:text-white transition-all"
+            >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                 <rect x="2" y="9" width="4" height="12"></rect>
@@ -320,7 +325,7 @@ export default function Home() {
           {/* Bottom Right GitHub Link */}
           <div className="absolute bottom-6 right-6">
             <a 
-              href="https://github.com" 
+              href="https://www.github.com/callmetechnophile" 
               target="_blank" 
               rel="noreferrer"
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-full shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-1.5"

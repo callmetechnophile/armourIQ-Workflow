@@ -1,0 +1,13 @@
+from typing import Dict, List
+
+# Static map of allowed scopes (tools) per agent name
+AGENT_SCOPES: Dict[str, List[str]] = {
+    "Planner Agent": ["delegate"],
+    "Retrieval Agent": ["search_projects", "fetch_sources"],
+    "Extraction Agent": ["extract_components"],
+    "Research Agent": ["search_papers", "summarize_papers"],
+    "Validation Agent": ["validate_architecture"],
+    "Optimization Agent": ["optimize_components"],
+    "Planning Agent": ["generate_roadmap", "generate_gantt"],
+    "Export Agent": ["export_pdf", "export_csv", "export_markdown"]
+}

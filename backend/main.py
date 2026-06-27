@@ -1,0 +1,38 @@
+import os
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from backend.routes.research import router as research_router
+
+app = FastAPI(
+    title="WorkflowGuide AI (ArmorIQ Secured)",
+    description="A cryptographically governed multi-agent engineering research system.",
+    version="1.0.0"
+)
+
+# Allow CORS for easy Next.js integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include sub-routes
+app.include_router(research_router)
+
+EXPORT_DIR = os.path.join(os.path.dirname(__file__), "exports")
+
+@app.get("/api/exports/{filename}")
+def download_export(filename: str):
+    file_path = os.path.join(EXPORT_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Requested file was not found or has expired.")
+    
+    # Return file response
+    return FileResponse(file_path, filename=filename)
+
+@app.get("/")
+def read_root():
+    return {"status": "ONLINE", "framework": "FastAPI (ArmorIQ Secured)"}

@@ -303,7 +303,7 @@ export default function Home() {
           {/* Bottom Left Social links */}
           <div className="absolute bottom-6 left-6 flex items-center gap-2.5">
             <a 
-              href="https://www.linkedin.com/in/mr.devgenius" 
+              href="https://www.instagram.com/mr.devgenius" 
               target="_blank" 
               rel="noreferrer"
               className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-400 hover:text-white transition-all"

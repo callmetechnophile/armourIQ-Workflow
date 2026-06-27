@@ -29,9 +29,7 @@ export default function Home() {
   const [pipelineData, setPipelineData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([
-    "I WANT TO BUILD A SOLAR POWERED DRONE"
-  ]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   
   // Audio wave fluctuation simulation
   const [waveHeights, setWaveHeights] = useState<number[]>([15, 30, 20, 40, 10, 30]);

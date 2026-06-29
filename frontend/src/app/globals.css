@@ -101,3 +101,94 @@ body {
   animation: scanline 6s linear infinite;
   pointer-events: none;
 }
+
+/* ==========================================
+   LIGHT MODE CONSOLE OVERRIDES
+   ========================================== */
+body.light-mode {
+  --background: #f8fafc; /* slate-50 */
+  --foreground: #0f172a; /* slate-900 */
+  --card-bg: rgba(255, 255, 255, 0.85); /* white/85 */
+  --card-border: rgba(59, 130, 246, 0.12); /* subtle blue-500 border */
+  --accent-cyan: #0891b2; /* cyan-600 */
+  --accent-blue: #2563eb; /* blue-600 */
+}
+
+body.light-mode .glass-panel {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(59, 130, 246, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02) !important;
+}
+
+body.light-mode .scanline::after {
+  background: linear-gradient(to bottom, transparent, rgba(6, 182, 212, 0.02) 50%, transparent) !important;
+}
+
+body.light-mode .text-slate-400 {
+  color: #475569 !important; /* slate-600 */
+}
+
+body.light-mode .text-slate-300 {
+  color: #334155 !important; /* slate-700 */
+}
+
+body.light-mode .text-slate-200 {
+  color: #1e293b !important; /* slate-800 */
+}
+
+body.light-mode .text-slate-100 {
+  color: #0f172a !important; /* slate-900 */
+}
+
+body.light-mode .text-slate-500 {
+  color: #64748b !important; /* slate-500 */
+}
+
+body.light-mode .bg-slate-900\/10 {
+  background-color: rgba(241, 245, 249, 0.6) !important; /* slate-100/60 */
+}
+
+body.light-mode .bg-zinc-950\/90 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .bg-zinc-950\/80 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .bg-zinc-950\/70 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .border-zinc-850 {
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .border-zinc-800 {
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .bg-slate-900 {
+  background-color: #f1f5f9 !important; /* slate-100 */
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .border-slate-800 {
+  border-color: #e2e8f0 !important;
+}
+
+body.light-mode ::-webkit-scrollbar-track {
+  background: #f1f5f9 !important; /* slate-100 */
+}
+
+body.light-mode ::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important; /* slate-300 */
+}
+
+body.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important; /* slate-400 */
+}
+

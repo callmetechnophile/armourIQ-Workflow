@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SignInButton, SignUpButton, Show, UserButton, useAuth } from '@clerk/nextjs';
-import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon } from 'lucide-react';
+import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon, Sun } from 'lucide-react';
 
 // Components
 import AgentPipeline from '@/components/AgentPipeline';
@@ -34,6 +34,7 @@ export default function Home() {
   const { getToken, userId } = useAuth();
   const [savedHistory, setSavedHistory] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(false);
   
   // Audio wave fluctuation simulation
   const [waveHeights, setWaveHeights] = useState<number[]>([15, 30, 20, 40, 10, 30]);
@@ -50,6 +51,16 @@ export default function Home() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (isLightMode) {
+        document.body.classList.add('light-mode');
+      } else {
+        document.body.classList.remove('light-mode');
+      }
+    }
+  }, [isLightMode]);
 
   useEffect(() => {
     async function fetchHistory() {
@@ -114,6 +125,12 @@ export default function Home() {
   const handleLoadHistory = (item: any) => {
     setPipelineData(item.data);
     setIntent(item.intent);
+  };
+
+  const handleHomeClick = () => {
+    setPipelineData(null);
+    setIntent('');
+    setError(null);
   };
 
   useEffect(() => {
@@ -201,9 +218,13 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen text-slate-100 flex flex-col relative overflow-x-hidden bg-slate-950/65 scanline"
+      className={`min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300 scanline ${
+        isLightMode ? "text-slate-900 bg-slate-50/90" : "text-slate-100 bg-slate-950/65"
+      }`}
       style={{
-        backgroundImage: "linear-gradient(rgba(3, 7, 18, 0.72), rgba(3, 7, 18, 0.72)), url('/bg.png')",
+        backgroundImage: isLightMode 
+          ? "linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.88)), url('/bg.png')" 
+          : "linear-gradient(rgba(3, 7, 18, 0.72), rgba(3, 7, 18, 0.72)), url('/bg.png')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -211,15 +232,19 @@ export default function Home() {
     >
       {/* Top Navbar */}
       <header className="px-6 py-4 flex justify-between items-center z-10">
-        {/* Top Left: Cyborg Icon */}
-        <div className="flex items-center gap-1">
-          <svg className="w-8 h-8 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        {/* Top Left: Cyborg Icon (Click returns to Home) */}
+        <button 
+          onClick={handleHomeClick}
+          className="flex items-center gap-1 cursor-pointer hover:opacity-85 transition-all focus:outline-none"
+          title="Return to Home Console"
+        >
+          <svg className={`w-8 h-8 transition-colors ${isLightMode ? "text-slate-800" : "text-slate-200"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
             <circle cx="9" cy="9" r="1.5" />
             <circle cx="15" cy="9" r="1.5" />
             <path strokeLinecap="round" d="M12 12v2" />
           </svg>
-        </div>
+        </button>
 
         {/* Top Right Controls: Auth & Toggle */}
         <div className="flex items-center gap-3">
@@ -242,8 +267,12 @@ export default function Home() {
               <UserButton />
             </div>
           </Show>
-          <button className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-300 hover:text-white hover:border-zinc-700 transition-all cursor-pointer">
-            <Moon className="w-4 h-4" />
+          <button 
+            onClick={() => setIsLightMode(!isLightMode)}
+            className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-300 hover:text-white hover:border-zinc-700 transition-all cursor-pointer"
+            title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          >
+            {isLightMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
           </button>
         </div>
       </header>

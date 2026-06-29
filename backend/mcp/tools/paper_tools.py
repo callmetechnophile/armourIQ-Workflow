@@ -21,6 +21,24 @@ def search_papers(query: str) -> List[Dict[str, Any]]:
                 "url": "https://core.ac.uk/reader/82049",
                 "publish_year": 2019,
                 "citation_count": 64
+            },
+            {
+                "id": "paper_3",
+                "title": "Aerodynamic Optimization of Centrifugal Suction Fans in Low-Pressure Dust Extractors",
+                "authors": "S. Patel, R. Kumar",
+                "source": "OpenAlex",
+                "url": "https://openalex.org/W30248591",
+                "publish_year": 2022,
+                "citation_count": 14
+            },
+            {
+                "id": "paper_4",
+                "title": "State-of-Charge and Health Estimation of LiFePO4 Battery Packs Using Adaptive EKF",
+                "authors": "L. Jenkins, A. Benson",
+                "source": "IEEE (via OpenAlex)",
+                "url": "https://openalex.org/W30294857",
+                "publish_year": 2023,
+                "citation_count": 37
             }
         ]
     elif "drone" in query_lower or "delivery" in query_lower:
@@ -42,18 +60,63 @@ def search_papers(query: str) -> List[Dict[str, Any]]:
                 "url": "https://openalex.org/W30193892",
                 "publish_year": 2020,
                 "citation_count": 19
+            },
+            {
+                "id": "paper_drone_3",
+                "title": "Battery Health Estimation and Flight Range Optimization for Multi-Rotor UAV Delivery",
+                "authors": "M. Zhao, L. Chen",
+                "source": "CORE",
+                "url": "https://core.ac.uk/reader/91048",
+                "publish_year": 2021,
+                "citation_count": 31
+            },
+            {
+                "id": "paper_drone_4",
+                "title": "Wind-Tunnel Testing of Aerodynamic Payload Interference on Package-Carrying Quadcopters",
+                "authors": "A. Miller, P. Wright",
+                "source": "OpenAlex",
+                "url": "https://openalex.org/W3019842",
+                "publish_year": 2023,
+                "citation_count": 12
             }
         ]
     else:
         return [
             {
                 "id": "paper_generic_1",
-                "title": f"Technical Advancements in Automated {query} Engineering Structures",
+                "title": f"Technical Advancements in Automated {query.capitalize()} Engineering Structures",
                 "authors": "Dr. E. Benson, P. Wright",
                 "source": "OpenAlex",
-                "url": "https://openalex.org/generic-paper-link",
+                "url": "https://openalex.org/generic-paper-link-1",
                 "publish_year": 2023,
                 "citation_count": 3
+            },
+            {
+                "id": "paper_generic_2",
+                "title": "Modern System Integration Paradigms in Autonomous Embedded Frameworks",
+                "authors": "K. Smith, A. Davis",
+                "source": "arXiv",
+                "url": "https://arxiv.org/abs/2204.0982",
+                "publish_year": 2022,
+                "citation_count": 15
+            },
+            {
+                "id": "paper_generic_3",
+                "title": f"Energy Harvesting and Low-Power Operations in Edge Integrated {query.capitalize()} Nodes",
+                "authors": "L. Davis, J. Miller",
+                "source": "CORE",
+                "url": "https://core.ac.uk/reader/19204",
+                "publish_year": 2023,
+                "citation_count": 8
+            },
+            {
+                "id": "paper_generic_4",
+                "title": "Mathematical Modeling of Multi-Agent Systems in Highly Dynamic Environments",
+                "authors": "J. Miller, R. Taylor",
+                "source": "OpenAlex",
+                "url": "https://openalex.org/generic-paper-link-4",
+                "publish_year": 2021,
+                "citation_count": 22
             }
         ]
 

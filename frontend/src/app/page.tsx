@@ -638,6 +638,8 @@ export default function Home() {
           <ResearchPapers 
             papers={pipelineData.papers} 
             summary={pipelineData.paper_summary} 
+            intent={intent || pipelineData.intent}
+            apiBase={apiBase}
           />
 
           {/* Decision Trace details */}

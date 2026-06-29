@@ -35,6 +35,22 @@ export default function Home() {
   const [savedHistory, setSavedHistory] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLightMode, setIsLightMode] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const count = parseInt(localStorage.getItem('armourflow_guest_usage') || '0', 10);
+      setUsageCount(count);
+    }
+  }, []);
+
+  const incrementUsage = () => {
+    const newCount = usageCount + 1;
+    setUsageCount(newCount);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('armourflow_guest_usage', newCount.toString());
+    }
+  };
   
   // Audio wave fluctuation simulation
   const [waveHeights, setWaveHeights] = useState<number[]>([15, 30, 20, 40, 10, 30]);
@@ -217,6 +233,12 @@ export default function Home() {
       recognition.stop();
       setIsRecording(false);
     }
+    
+    // Check guest usage limit
+    if (!userId && usageCount >= 2) {
+      return;
+    }
+    
     if (!searchIntent.trim() || searchIntent === "Listening...") return;
     
     setError(null);
@@ -266,6 +288,11 @@ export default function Home() {
       setActiveAgent(null);
       setCurrentStepIndex(-1);
       setIsProcessing(false);
+      
+      // Increment guest usage count
+      if (!userId) {
+        incrementUsage();
+      }
 
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
@@ -674,6 +701,39 @@ export default function Home() {
 
           {/* Audit Verification Log panel */}
           <AuditTrail logs={pipelineData.audit_trail} />
+        </div>
+      )}
+      {/* Blocker Overlay for Guests exceeding limit */}
+      {!userId && usageCount >= 2 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-xl px-4 animate-fade-in">
+          <div className="glass-panel p-8 max-w-md w-full border border-blue-500/30 bg-zinc-950/90 text-center shadow-2xl space-y-6">
+            <img 
+              src="/icon.png" 
+              alt="ArmourFlow AI Logo" 
+              className="w-16 h-16 mx-auto object-contain animate-pulse" 
+            />
+            <div className="space-y-2">
+              <h2 className="text-xl font-mono font-black tracking-widest text-slate-100 uppercase">
+                LIMIT REACHED
+              </h2>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                You have used your 2 free search generations. Please Sign In or Sign Up below to unlock unlimited cryptographic research packages.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-3 pt-2">
+              <SignInButton mode="modal">
+                <button className="w-full text-xs font-mono font-bold py-3 rounded border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-slate-200 hover:text-white transition-all cursor-pointer">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="w-full text-xs font-mono font-bold py-3 rounded bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer shadow-lg shadow-indigo-600/20">
+                  Create Free Account
+                </button>
+              </SignUpButton>
+            </div>
+          </div>
         </div>
       )}
     </div>

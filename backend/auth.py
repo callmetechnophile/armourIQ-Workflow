@@ -2,8 +2,8 @@ import os
 import json
 import base64
 import httpx
-from fastapi import HTTPBearer, Security, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import Security, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Header extractor helper
 security = HTTPBearer()

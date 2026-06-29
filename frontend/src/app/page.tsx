@@ -2,6 +2,7 @@
 // Vercel deployment rebuild trigger
 
 import React, { useState, useEffect } from 'react';
+import { SignInButton, SignUpButton, Show, UserButton, useAuth } from '@clerk/nextjs';
 import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon } from 'lucide-react';
 
 // Components
@@ -30,6 +31,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const { getToken, userId } = useAuth();
+  const [savedHistory, setSavedHistory] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Audio wave fluctuation simulation
   const [waveHeights, setWaveHeights] = useState<number[]>([15, 30, 20, 40, 10, 30]);
@@ -46,6 +50,71 @@ export default function Home() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      if (!userId || !apiBase) return;
+      try {
+        const token = await getToken();
+        const response = await fetch(`${apiBase}/api/packages/history`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSavedHistory(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch history:", err);
+      }
+    }
+    fetchHistory();
+  }, [userId, apiBase, getToken]);
+
+  const handleSavePackage = async () => {
+    if (!pipelineData) return;
+    setIsSaving(true);
+    try {
+      const token = await getToken();
+      const response = await fetch(`${apiBase}/api/packages/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          intent: pipelineData.intent,
+          readiness_score: pipelineData.validation?.readiness_score || 80,
+          risk_score: pipelineData.validation?.risk_score || 30,
+          optimization_score: pipelineData.optimization?.optimization_score || 90,
+          data: pipelineData
+        })
+      });
+      if (response.ok) {
+        const updatedResponse = await fetch(`${apiBase}/api/packages/history`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (updatedResponse.ok) {
+          const data = await updatedResponse.json();
+          setSavedHistory(data);
+        }
+        alert("Specification package saved successfully to your profile!");
+      } else {
+        alert("Failed to save package.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving package.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLoadHistory = (item: any) => {
+    setPipelineData(item.data);
+    setIntent(item.intent);
+  };
 
   useEffect(() => {
     let interval: any;
@@ -152,10 +221,31 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Top Right: Dark Mode Toggle */}
-        <button className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-300 hover:text-white hover:border-zinc-700 transition-all">
-          <Moon className="w-4 h-4" />
-        </button>
+        {/* Top Right Controls: Auth & Toggle */}
+        <div className="flex items-center gap-3">
+          <Show when="signed-out">
+            <div className="flex items-center gap-2">
+              <SignInButton mode="modal">
+                <button className="text-xs font-mono font-bold px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/40 hover:bg-zinc-900 text-slate-300 hover:text-white transition-all cursor-pointer">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="text-xs font-mono font-bold px-3.5 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </div>
+          </Show>
+          <Show when="signed-in">
+            <div className="flex items-center gap-2">
+              <UserButton />
+            </div>
+          </Show>
+          <button className="p-2 rounded-full border border-zinc-800 bg-zinc-950/40 text-slate-300 hover:text-white hover:border-zinc-700 transition-all cursor-pointer">
+            <Moon className="w-4 h-4" />
+          </button>
+        </div>
       </header>
 
       {/* Landing Layout Container */}
@@ -247,6 +337,30 @@ export default function Home() {
               ))}
             </div>
           </div>
+
+          {/* Saved Specifications List (Signed In Only) */}
+          <Show when="signed-in">
+            {savedHistory.length > 0 && (
+              <div className="space-y-3 mb-6">
+                <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase block">
+                  SAVED SPECIFICATIONS
+                </span>
+                <div className="flex flex-wrap justify-center gap-2 max-w-xl">
+                  {savedHistory.map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleLoadHistory(item)}
+                      disabled={isProcessing}
+                      className="bg-zinc-950/90 border border-zinc-850 hover:border-cyan-900/50 text-slate-300 hover:text-white text-[10px] font-bold px-4 py-1.5 rounded-full transition-all tracking-wide flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Layers className="w-3 h-3 text-cyan-400" />
+                      {item.intent.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Show>
 
           {/* Recent Searches */}
           {recentSearches.length > 0 && (
@@ -422,6 +536,16 @@ export default function Home() {
             </div>
             
             <div className="flex flex-wrap gap-3">
+              <Show when="signed-in">
+                <button
+                  onClick={handleSavePackage}
+                  disabled={isSaving}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-500/10 cursor-pointer disabled:opacity-50"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  {isSaving ? "Saving..." : "Save Spec"}
+                </button>
+              </Show>
               <a
                 href={`${apiBase}${pipelineData.exports?.pdf?.url}`}
                 download

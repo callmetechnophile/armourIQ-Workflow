@@ -39,6 +39,46 @@ export default function Home() {
   // Audio wave fluctuation simulation
   const [waveHeights, setWaveHeights] = useState<number[]>([15, 30, 20, 40, 10, 30]);
   const [apiBase, setApiBase] = useState('');
+  const [recognition, setRecognition] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const rec = new SpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = 'en-US';
+        
+        rec.onresult = (event: any) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+          const text = finalTranscript || interimTranscript;
+          if (text) {
+            setIntent(text);
+          }
+        };
+        
+        rec.onerror = (err: any) => {
+          console.error("Speech recognition error:", err);
+          setIsRecording(false);
+        };
+        
+        rec.onend = () => {
+          setIsRecording(false);
+        };
+        
+        setRecognition(rec);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -147,15 +187,36 @@ export default function Home() {
 
   const handleVoiceInput = () => {
     if (isRecording) {
+      if (recognition) {
+        recognition.stop();
+      }
       setIsRecording(false);
-      setIntent("I want to build a solar powered vacuum cleaner");
     } else {
       setIsRecording(true);
       setIntent("Listening...");
+      if (recognition) {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        // Fallback for simulated input if SpeechRecognition is blocked or unsupported
+        setTimeout(() => {
+          if (isRecording) {
+            setIntent("I want to build a solar powered vacuum cleaner");
+            setIsRecording(false);
+          }
+        }, 3000);
+      }
     }
   };
 
   const handleSearchSubmit = async (searchIntent = intent) => {
+    if (isRecording && recognition) {
+      recognition.stop();
+      setIsRecording(false);
+    }
     if (!searchIntent.trim() || searchIntent === "Listening...") return;
     
     setError(null);

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SignInButton, SignUpButton, Show, UserButton, useAuth } from '@clerk/nextjs';
-import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon, Sun } from 'lucide-react';
+import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon, Sun, Presentation, X } from 'lucide-react';
 
 // Components
 import AgentPipeline from '@/components/AgentPipeline';
@@ -36,6 +36,8 @@ export default function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLightMode, setIsLightMode] = useState(false);
   const [usageCount, setUsageCount] = useState(0);
+  const [pptModalOpen, setPptModalOpen] = useState(false);
+  const [pptPrompt, setPptPrompt] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -187,6 +189,119 @@ export default function Home() {
     setPipelineData(null);
     setIntent('');
     setError(null);
+  };
+
+  const handleGeneratePPT = () => {
+    if (!pipelineData) return;
+    
+    const projectName = "ARMOURFLOW AI";
+    const coreVibe = "Cyberpunk dark-mode blueprint tech console, glowing cyan and electric blue accents, neon red alerts";
+    const targetAudience = "Investors, Product Managers, Engineers, Security Auditors";
+    
+    const rawBackground = `
+- Intent: ${pipelineData.intent}
+- Core Concept: Autonomous Multi-Agent engineering pipeline for hardware prototyping.
+- Built Deliverables & Capabilities:
+  1. AI-Agent Sequenced Planner: Sequential execution logs across 8 agents (Planner, Retrieval, Extraction, Research, Validation, Optimization, Planning, Export).
+  2. ArmorIQ Safety Enforcer: Runtime tool authorization checker with visual 'Blocked Info' logs intercepting unauthorized scopes (e.g. preventing the Research Agent from calling export_pdf).
+  3. Real-time User Interface: Browser Web Speech API for voice-to-text inputs, Clerk authentication profiles, and a 2-generation guest usage blocker.
+  4. Design Traceability & BOM Sourcing: Interactive Bill of Materials (BOM) showing component specs and optimized cost-effective alternatives, backed by a Decision Trace transparent log.
+  5. Literature Integration & AI Advisor: Retrieved Reference cards displaying at least 4 research papers with metadata linking to source URLs, complete with an interactive 'AI Integration Advisor' chatbot drawer to discuss custom architecture integrations.
+  6. Execution Readiness circular score dials (Readiness, Risk, and Optimization scores) and sequential Gantt Roadmap assembly timeline schedules.
+`;
+
+    const promptText = `Act as a premium presentation architect specializing in Gamma's specific layout engine. 
+
+I am going to provide you with raw data from a completed project. Your goal is to transform this data into a highly structured, markdown-formatted presentation that Gamma can automatically parse into visually striking, multi-column, and high-motion interactive cards.
+
+### 1. PROJECT DATA & CONTEXT
+*   **Project Name:** ${projectName}
+*   **Core Vibe:** ${coreVibe}
+*   **Target Audience:** ${targetAudience}
+
+---
+### RAW PROJECT BACKGROUND (DO NOT COPY WORD-FOR-WORD)
+${rawBackground.trim()}
+---
+
+### 2. EXECUTION RULES FOR GAMMA GENERATION
+*   **Use Multi-Column Layouts:** For features, comparisons, or steps, split the text into 2 or 3 columns to mimic interactive UI dashboards.
+*   **Keep Text Punchy:** Use short, high-impact headers and minimal body text.
+*   **Add Visual Notes:** At the end of every card, include an italicized "Visual & Motion Note" to guide image placement and slide transitions (e.g., Morph transitions, zoom effects).
+
+### 3. THE OUTLINE FOR GENERATION
+
+---
+## Card 1: Title Slide
+### ${projectName}
+#### IDEA -> RESEARCH -> OPTIMIZE -> EXECUTE: Accelerating hardware prototyping via secure, autonomous multi-agent pipelines.
+
+*Visual Note: Use a full-bleed, high-contrast tech background. Set transition to smooth morph.*
+
+---
+## Card 2: The Problem & Opportunity
+### Why We Built This
+
+[Column 1]
+**The Core Pain Point**
+* Prototyping hardware is bottlenecked by complex component sourcing, lack of automated cost optimization, and security compliance risks during autonomous research.
+
+[Column 2]
+**The Opportunity**
+* ARMOURFLOW AI leverages 8 sequenced agents to automate research, optimize component sourcing, enforce runtime safety policies, and provide live design guidance.
+
+*Visual Note: Use a split screen layout. High-contrast colors to separate the problem from the solution.*
+
+---
+## Card 3: Project Architecture & Flow
+### How the Interactive Motion System Works
+
+* **Step 1: Core Engine** -> Natural language intents processed via sequential multi-agent pipeline (Planner, Retrieval, Extraction, Research).
+* **Step 2: Interactive Middleware** -> Validation & Optimization agents calculate scores, compile optimal BOM components, and enforce zero-trust policies.
+* **Step 3: Motion Delivery** -> Live Gantt Roadmaps, clickable research references, interactive chatbot advisor drawer, and specification package exports.
+
+*Visual Note: Format this as a horizontal timeline or sequential cards. Design for a linear, flowing motion path.*
+
+---
+## Card 4: Key Features & Capabilities
+### The Core Built Deliverables
+
+[Column 1]
+⚡ **ArmorIQ Enforcer**
+* Zero-trust security checker. Intercepts and blocks out-of-scope tools (e.g. blocking Research Agent from PDF exporting) and posts transparent 'Blocked Info' logs.
+
+[Column 2]
+🎨 **Intelligent Console UI**
+* Dynamic landing page with real-time browser Web Speech API voice-to-text typing, Clerk profiles, and a 2-generation guest usage screen blocker.
+
+[Column 3]
+⚙️ **AI Advisor Chatbot**
+* Interactive sliding chat drawer connected to a custom backend /chat advisor API to discuss architectural integrations on-the-fly.
+
+*Visual Note: Use a 3-column card grid to mimic an interactive software dashboard feature list.*
+
+---
+## Card 5: Real-World Impact & Metrics
+### What the Complete Build Achieves
+
+> **Key Milestone:** Accelerates mechanical and hardware prototyping speeds by up to 80% while guaranteeing 100% policy compliance.
+
+* **Performance:** High-reliability API builds serving optimized BOM component options and detailed Gantt roadmap assembly schedules.
+* **User Experience:** Seamless glass-morphism panels, circular execution readiness dials, and interactive links to real academic publications.
+
+*Visual Note: Use a large callout block or stat callout layout for the key milestone to make it pop instantly.*
+
+---
+## Card 6: Next Steps & Future Scale
+### Where the Project Goes Next
+
+* **Phase 1:** Expand the Optimization Agent to integrate live real-time API pricing from hardware distributors.
+* **Phase 2:** Scale the AI Advisor to support multi-user team workspaces with synchronized chat logs.
+
+*Visual Note: Clean, minimalist closing slide with a clear focal point on the next milestones.*`;
+
+    setPptPrompt(promptText);
+    setPptModalOpen(true);
   };
 
   useEffect(() => {
@@ -656,7 +771,7 @@ export default function Home() {
             <div>
               <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 mb-1 font-mono">
                 <FileText className="w-4 h-4 text-cyan-400" />
-                Download Spec Packages
+                Download Info
               </h3>
               <p className="text-xs text-slate-400">
                 Export complete engineering specifications, BOM quotes, and Gantt roadmap timeline.
@@ -674,6 +789,13 @@ export default function Home() {
                   {isSaving ? "Saving..." : "Save Spec"}
                 </button>
               </Show>
+              <button
+                onClick={handleGeneratePPT}
+                className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5 shadow-lg shadow-purple-500/10 cursor-pointer"
+              >
+                <Presentation className="w-3.5 h-3.5" />
+                Generate PPT
+              </button>
               <a
                 href={`${apiBase}${pipelineData.exports?.pdf?.url}`}
                 download
@@ -703,6 +825,57 @@ export default function Home() {
 
           {/* Audit Verification Log panel */}
           <AuditTrail logs={pipelineData.audit_trail} />
+        </div>
+      )}
+
+      {/* PPT Generator Modal */}
+      {pptModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4 animate-fade-in">
+          <div className="glass-panel p-6 max-w-2xl w-full border border-purple-500/30 bg-zinc-950/95 text-left shadow-2xl flex flex-col space-y-4">
+            <div className="flex justify-between items-center border-b border-purple-900/40 pb-3">
+              <div className="flex items-center gap-2">
+                <Presentation className="w-5 h-5 text-purple-400" />
+                <h3 className="text-sm font-mono font-bold text-slate-200 uppercase tracking-wider">
+                  Gamma Presentation Prompt Architect
+                </h3>
+              </div>
+              <button 
+                onClick={() => setPptModalOpen(false)}
+                className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <p className="text-[11px] text-slate-400 font-mono leading-relaxed">
+              Below is your customized presentation prompt. Copy it and paste it into **Gamma App** to generate interactive motion slides instantly!
+            </p>
+            
+            <textarea
+              readOnly
+              value={pptPrompt}
+              rows={12}
+              className="w-full bg-slate-950 border border-zinc-850 rounded p-3 text-[10px] font-mono text-purple-300 outline-none focus:border-purple-500/40"
+            />
+            
+            <div className="flex justify-end gap-2.5 pt-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(pptPrompt);
+                  alert("Gamma Prompt copied to clipboard!");
+                }}
+                className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                Copy Prompt
+              </button>
+              <button
+                onClick={() => setPptModalOpen(false)}
+                className="bg-slate-900 hover:bg-slate-800 border border-zinc-800 text-slate-300 text-xs font-bold px-4 py-2 rounded transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
       {/* Blocker Overlay for Guests exceeding limit */}

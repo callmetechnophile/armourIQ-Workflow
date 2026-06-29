@@ -28,7 +28,7 @@ export default function ScopeViolation({ logs }: ScopeViolationProps) {
       <div className="flex justify-between items-center mb-6 border-b border-zinc-800/60 pb-3">
         <h3 className="text-sm font-bold text-red-400 glow-red flex items-center gap-2.5">
           <ShieldAlert className="w-5 h-5 text-red-500" />
-          ArmorIQ Scope Violation & Block Log
+          Blocked Info
         </h3>
         <span className="text-[9px] font-mono font-extrabold tracking-widest text-red-500 border border-red-500/20 bg-red-950/20 px-2.5 py-1 rounded">
           ENFORCER ACTIVE

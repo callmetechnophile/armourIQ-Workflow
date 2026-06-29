@@ -45,20 +45,20 @@ export default function ResearchPapers({ papers, summary }: ResearchPapersProps)
           Retrieved References
         </h3>
         {papers.map((paper) => (
-          <div key={paper.id} className="glass-panel p-4 border border-blue-500/10 hover:border-blue-500/30 transition-all duration-200">
+          <a 
+            key={paper.id} 
+            href={paper.url} 
+            target="_blank" 
+            rel="noreferrer"
+            className="glass-panel p-4 border border-blue-500/10 hover:border-blue-500/30 hover:bg-slate-900/5 transition-all duration-200 block cursor-pointer"
+          >
             <div className="flex justify-between items-start gap-2 mb-1">
               <h4 className="text-xs font-semibold text-slate-200 line-clamp-2 leading-tight">
                 {paper.title}
               </h4>
-              <a 
-                href={paper.url} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="text-cyan-400 hover:text-cyan-300 transition-colors"
-                title="Open Paper Source"
-              >
+              <span className="text-cyan-400 hover:text-cyan-300 transition-colors flex-shrink-0 mt-0.5">
                 <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              </span>
             </div>
             
             <p className="text-[10px] text-slate-400 mb-2">
@@ -69,7 +69,7 @@ export default function ResearchPapers({ papers, summary }: ResearchPapersProps)
               <span>Published: {paper.publish_year}</span>
               <span>Citations: {paper.citation_count}</span>
             </div>
-          </div>
+          </a>
         ))}
       </div>
 

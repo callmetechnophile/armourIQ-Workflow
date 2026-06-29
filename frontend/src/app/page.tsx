@@ -280,10 +280,19 @@ export default function Home() {
       {/* Landing Layout Container */}
       {!showResults ? (
         <div className="flex-1 flex flex-col justify-center items-center px-4 max-w-4xl mx-auto w-full z-10 pb-20 mt-4 text-center">
+          {/* Brand Logo Icon */}
+          <img 
+            src="/icon.png" 
+            alt="ArmourFlow AI Logo" 
+            className="w-20 h-20 md:w-24 md:h-24 mb-3 object-contain" 
+          />
+
           {/* Header Title Block */}
-          <div className="bg-zinc-950/90 text-slate-100 font-mono tracking-[0.25em] px-5 py-2.5 text-2xl md:text-3xl font-extrabold uppercase border border-zinc-800 rounded-sm shadow-xl max-w-lg w-full">
+          <h1 className={`font-mono tracking-[0.25em] text-4xl md:text-6xl font-black uppercase transition-colors duration-300 ${
+            isLightMode ? "text-slate-900" : "text-slate-100"
+          }`}>
             ARMOURFLOW AI
-          </div>
+          </h1>
 
           {/* Subtitle */}
           <h2 className="text-xs md:text-sm text-slate-200 tracking-[0.3em] font-extrabold mt-6 mb-2 uppercase">

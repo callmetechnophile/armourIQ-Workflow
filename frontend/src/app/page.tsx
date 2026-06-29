@@ -300,8 +300,17 @@ ${rawBackground.trim()}
 
 *Visual Note: Clean, minimalist closing slide with a clear focal point on the next milestones.*`;
 
-    setPptPrompt(promptText);
-    setPptModalOpen(true);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(promptText).then(() => {
+        alert("Gamma prompt copied to clipboard! Opening Gamma... Press Ctrl+V (or Cmd+V) to paste the prompt in the text box.");
+        window.open("https://gamma.app/create/paste", "_blank");
+      }).catch(err => {
+        console.error("Clipboard copy failed:", err);
+        window.open("https://gamma.app/create/paste", "_blank");
+      });
+    } else {
+      window.open("https://gamma.app/create/paste", "_blank");
+    }
   };
 
   useEffect(() => {
@@ -794,7 +803,7 @@ ${rawBackground.trim()}
                 className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5 shadow-lg shadow-purple-500/10 cursor-pointer"
               >
                 <Presentation className="w-3.5 h-3.5" />
-                Generate PPT
+                Presentation
               </button>
               <a
                 href={`${apiBase}${pipelineData.exports?.pdf?.url}`}
@@ -828,56 +837,7 @@ ${rawBackground.trim()}
         </div>
       )}
 
-      {/* PPT Generator Modal */}
-      {pptModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4 animate-fade-in">
-          <div className="glass-panel p-6 max-w-2xl w-full border border-purple-500/30 bg-zinc-950/95 text-left shadow-2xl flex flex-col space-y-4">
-            <div className="flex justify-between items-center border-b border-purple-900/40 pb-3">
-              <div className="flex items-center gap-2">
-                <Presentation className="w-5 h-5 text-purple-400" />
-                <h3 className="text-sm font-mono font-bold text-slate-200 uppercase tracking-wider">
-                  Gamma Presentation Prompt Architect
-                </h3>
-              </div>
-              <button 
-                onClick={() => setPptModalOpen(false)}
-                className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <p className="text-[11px] text-slate-400 font-mono leading-relaxed">
-              Below is your customized presentation prompt. Copy it and paste it into **Gamma App** to generate interactive motion slides instantly!
-            </p>
-            
-            <textarea
-              readOnly
-              value={pptPrompt}
-              rows={12}
-              className="w-full bg-slate-950 border border-zinc-850 rounded p-3 text-[10px] font-mono text-purple-300 outline-none focus:border-purple-500/40"
-            />
-            
-            <div className="flex justify-end gap-2.5 pt-2">
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(pptPrompt);
-                  alert("Gamma Prompt copied to clipboard!");
-                }}
-                className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                Copy Prompt
-              </button>
-              <button
-                onClick={() => setPptModalOpen(false)}
-                className="bg-slate-900 hover:bg-slate-800 border border-zinc-800 text-slate-300 text-xs font-bold px-4 py-2 rounded transition-all cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
       {/* Blocker Overlay for Guests exceeding limit */}
       {!userId && usageCount >= 2 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-xl px-4 animate-fade-in">

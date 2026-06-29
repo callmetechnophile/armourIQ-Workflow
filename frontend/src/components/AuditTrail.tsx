@@ -34,9 +34,9 @@ export default function AuditTrail({ logs }: AuditTrailProps) {
     <div className="space-y-6">
       <div className="glass-panel p-6 border border-blue-500/20">
         <div className="flex justify-between items-center mb-4 border-b border-blue-900/40 pb-3">
-          <h3 className="text-md font-semibold text-cyan-400 glow-cyan flex items-center gap-2">
+          <h3 className="text-md font-bold text-cyan-400 glow-cyan flex items-center gap-2">
             <Key className="w-5 h-5" />
-            ArmorIQ Cryptographic Audit Trail
+            ArmorIQ Audit
           </h3>
           <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
             Logs Captured: {logs.length}

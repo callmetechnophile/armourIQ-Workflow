@@ -15,6 +15,27 @@ import DecisionTrace from '@/components/DecisionTrace';
 import ResearchPapers from '@/components/ResearchPapers';
 import GanttRoadmap from '@/components/GanttRoadmap';
 
+// Production Tier 1 Components
+import DelegationScopeViewer from '@/components/DelegationScopeViewer';
+import ReceiptExplorer from '@/components/ReceiptExplorer';
+import ScopeViolationSimulator from '@/components/ScopeViolationSimulator';
+import CostBreakdown from '@/components/CostBreakdown';
+import AlternativeComponents from '@/components/AlternativeComponents';
+import VoltageRiskTable from '@/components/VoltageRiskTable';
+import PinMappingTable from '@/components/PinMappingTable';
+import BOMExportPanel from '@/components/BOMExportPanel';
+
+const DASHBOARD_TABS = [
+  { id: "delegation", label: "Delegation Scope" },
+  { id: "receipts", label: "Receipts" },
+  { id: "violations", label: "Violations" },
+  { id: "cost", label: "Cost Breakdown" },
+  { id: "alternatives", label: "Alternatives" },
+  { id: "voltage", label: "Voltage Risks" },
+  { id: "pins", label: "Pin Mapping" },
+  { id: "bom", label: "BOM Export" }
+];
+
 const SUGGESTIONS = [
   "Voice controlled lights",
   "Solar tracker",
@@ -38,6 +59,8 @@ export default function Home() {
   const [usageCount, setUsageCount] = useState(0);
   const [pptModalOpen, setPptModalOpen] = useState(false);
   const [pptPrompt, setPptPrompt] = useState('');
+  const [activeDashboardTab, setActiveDashboardTab] = useState('delegation');
+  const [receiptRefreshTrigger, setReceiptRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -395,6 +418,10 @@ ${rawBackground.trim()}
         "Planner Agent",
         "Retrieval Agent",
         "Extraction Agent",
+        "Cost Engine",
+        "Alternative Finder",
+        "Voltage Checker",
+        "Pin Generator",
         "Research Agent",
         "Validation Agent",
         "Optimization Agent",
@@ -412,6 +439,7 @@ ${rawBackground.trim()}
       setActiveAgent(null);
       setCurrentStepIndex(-1);
       setIsProcessing(false);
+      setReceiptRefreshTrigger(prev => prev + 1);
       
       // Increment guest usage count
       if (!userId) {
@@ -774,6 +802,55 @@ ${rawBackground.trim()}
             roadmap={pipelineData.roadmap} 
             gantt={pipelineData.gantt} 
           />
+
+          {/* Tier 1 Feature Tabbed Dashboard */}
+          <div className="glass-panel p-6 border border-slate-800 bg-slate-950/40 space-y-6">
+            <div className="flex border-b border-slate-800 overflow-x-auto gap-2 pb-px scrollbar-none">
+              {DASHBOARD_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveDashboardTab(tab.id)}
+                  className={`py-3 px-4 text-xs font-mono font-bold tracking-wider uppercase border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+                    activeDashboardTab === tab.id
+                      ? "border-cyan-500 text-cyan-400 font-extrabold"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="transition-all duration-300">
+              {activeDashboardTab === 'delegation' && (
+                <DelegationScopeViewer logs={pipelineData.audit_trail} />
+              )}
+              {activeDashboardTab === 'receipts' && (
+                <ReceiptExplorer apiBase={apiBase} refreshTrigger={receiptRefreshTrigger} />
+              )}
+              {activeDashboardTab === 'violations' && (
+                <ScopeViolationSimulator 
+                  apiBase={apiBase} 
+                  onViolationTriggered={() => setReceiptRefreshTrigger(prev => prev + 1)} 
+                />
+              )}
+              {activeDashboardTab === 'cost' && (
+                <CostBreakdown components={pipelineData.components} costSummary={pipelineData.cost_summary} />
+              )}
+              {activeDashboardTab === 'alternatives' && (
+                <AlternativeComponents components={pipelineData.components} />
+              )}
+              {activeDashboardTab === 'voltage' && (
+                <VoltageRiskTable risks={pipelineData.voltage_risks} />
+              )}
+              {activeDashboardTab === 'pins' && (
+                <PinMappingTable pins={pipelineData.pin_mapping} />
+              )}
+              {activeDashboardTab === 'bom' && (
+                <BOMExportPanel apiBase={apiBase} exports={pipelineData.bom_exports} />
+              )}
+            </div>
+          </div>
 
           {/* Export spec buttons panel */}
           <div className="glass-panel p-6 border border-blue-500/20 bg-slate-900/10 flex flex-col md:flex-row justify-between items-center gap-4">

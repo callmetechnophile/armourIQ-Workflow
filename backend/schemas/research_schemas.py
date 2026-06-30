@@ -23,3 +23,8 @@ class ResearchResponse(BaseModel):
     decision_trace: List[Dict[str, str]]
     audit_trail: List[Dict[str, Any]]
     blocked_test_success: bool
+    cost_summary: Optional[Dict[str, Any]] = None
+    alternatives: Optional[List[Dict[str, Any]]] = None
+    voltage_risks: Optional[List[Dict[str, Any]]] = None
+    pin_mapping: Optional[List[Dict[str, Any]]] = None
+    bom_exports: Optional[Dict[str, Any]] = None

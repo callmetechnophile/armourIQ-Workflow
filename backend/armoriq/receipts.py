@@ -1,3 +1,4 @@
+import os
 import hmac
 import hashlib
 import time
@@ -65,3 +66,46 @@ def verify_receipt(receipt: Dict[str, Any]) -> bool:
         return hmac.compare_digest(expected_sig, signature)
     except Exception:
         return False
+
+# Receipt Explorer Storage Config
+RECEIPTS_DIR = os.path.join(os.path.dirname(__file__), "receipts")
+os.makedirs(RECEIPTS_DIR, exist_ok=True)
+
+def save_tool_receipt(agent: str, parent: str, tool: str, scope: List[str], status: str, execution_result: Any) -> Dict[str, Any]:
+    """
+    Saves a tool invocation receipt as a JSON file in backend/armoriq/receipts/.
+    Generates a cryptographic hash and traces the authority chain.
+    """
+    timestamp = str(time.time())
+    
+    # Calculate execution result hash
+    res_str = str(execution_result)
+    result_hash = hashlib.sha256(res_str.encode('utf-8')).hexdigest()
+    
+    # Build unique hash for the receipt
+    payload = f"{agent}|{parent}|{tool}|{','.join(scope)}|{timestamp}|{status}|{result_hash}"
+    receipt_hash = hashlib.sha256(payload.encode('utf-8')).hexdigest()
+    
+    # Trace simple authority chain
+    authority_chain = ["Planner Agent"]
+    if agent != "Planner Agent":
+        authority_chain.append(agent)
+        
+    receipt_data = {
+        "agent": agent,
+        "parent": parent if parent else "None (Root Plan)",
+        "tool": tool,
+        "scope": scope,
+        "timestamp": timestamp,
+        "hash": receipt_hash,
+        "status": "success" if status == "SUCCESS" else ("blocked" if status == "BLOCKED" else "failed"),
+        "execution_result": res_str[:300] + "..." if len(res_str) > 300 else res_str,
+        "authority_chain": " -> ".join(authority_chain)
+    }
+    
+    filepath = os.path.join(RECEIPTS_DIR, f"{receipt_hash}.json")
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(receipt_data, f, indent=2)
+        
+    return receipt_data
+

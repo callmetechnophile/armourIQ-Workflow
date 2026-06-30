@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from backend.armoriq.receipts import generate_receipt, verify_receipt, CryptographicReceipt
+from backend.armoriq.receipts import generate_receipt, verify_receipt, CryptographicReceipt, save_tool_receipt
 from backend.armoriq.scope_map import AGENT_SCOPES
 from backend.armoriq.policies import ScopeViolationError, validate_tool_invocation
 
@@ -11,6 +11,13 @@ from backend.mcp.tools.validation_tools import validate_architecture
 from backend.mcp.tools.optimization_tools import optimize_components
 from backend.mcp.tools.roadmap_tools import generate_roadmap, generate_gantt
 from backend.mcp.tools.export_tools import export_pdf, export_csv, export_markdown
+
+# Production Grade Services
+from backend.services.cost_service import calculate_total_cost
+from backend.services.alternative_service import find_alternatives
+from backend.services.electrical_service import check_voltage_compatibility
+from backend.services.pin_service import generate_pin_map
+from backend.services.bom_service import export_bom
 
 # Global in-memory audit log list for quick tracking
 AUDIT_LOGS: List[Dict[str, Any]] = []
@@ -125,6 +132,16 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             result = fetch_sources(args.get("url", ""))
         elif tool_name == "extract_components":
             result = extract_components(args.get("raw_text", ""))
+        elif tool_name == "calculate_total_cost":
+            result = calculate_total_cost(args.get("components", []))
+        elif tool_name == "find_alternatives":
+            result = find_alternatives(args.get("component_name", ""))
+        elif tool_name == "check_voltage_compatibility":
+            result = check_voltage_compatibility(args.get("components", []))
+        elif tool_name == "generate_pin_map":
+            result = generate_pin_map(args.get("components", []))
+        elif tool_name == "export_bom":
+            result = export_bom(args.get("components", []), args.get("cost_summary", {}))
         elif tool_name == "search_papers":
             result = search_papers(args.get("query", ""))
         elif tool_name == "summarize_papers":
@@ -157,6 +174,15 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             receipt_id=receipt_dict.get("receipt_id"),
             parent_receipt_id=receipt_dict.get("parent_receipt_id")
         )
+        # Expose invocation receipt
+        save_tool_receipt(
+            agent=agent_name,
+            parent=receipt_dict.get("receipt_id", ""),
+            tool=tool_name,
+            scope=receipt_dict.get("scope", []),
+            status="SUCCESS",
+            execution_result=result
+        )
         return result
         
     except ScopeViolationError as sve:
@@ -171,6 +197,15 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             receipt_id=receipt_dict.get("receipt_id"),
             parent_receipt_id=receipt_dict.get("parent_receipt_id")
         )
+        # Expose invocation receipt for block logs
+        save_tool_receipt(
+            agent=agent_name,
+            parent=receipt_dict.get("receipt_id", ""),
+            tool=tool_name,
+            scope=receipt_dict.get("scope", []),
+            status="BLOCKED",
+            execution_result=str(sve)
+        )
         # Raise error again to be handled by backend
         raise sve
     except Exception as e:
@@ -184,5 +219,14 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             details=f"Tool failed with unexpected error: {str(e)}",
             receipt_id=receipt_dict.get("receipt_id"),
             parent_receipt_id=receipt_dict.get("parent_receipt_id")
+        )
+        # Expose invocation receipt for failure logs
+        save_tool_receipt(
+            agent=agent_name,
+            parent=receipt_dict.get("receipt_id", ""),
+            tool=tool_name,
+            scope=receipt_dict.get("scope", []),
+            status="FAILED",
+            execution_result=str(e)
         )
         raise e

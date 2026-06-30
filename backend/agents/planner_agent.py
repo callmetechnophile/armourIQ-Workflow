@@ -59,10 +59,67 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     extraction_res = run_extraction(retrieved_text, extraction_receipt.model_dump())
     components = extraction_res.get("components", [])
     
+    # 4b. Cost Engine
+    cost_receipt = delegate(
+        agent_name="Cost Engine",
+        requested_scope=["calculate_total_cost"],
+        parent_receipt=root_receipt_dict
+    )
+    cost_res = invoke_tool(
+        agent_name="Cost Engine",
+        tool_name="calculate_total_cost",
+        args={"components": components},
+        receipt_dict=cost_receipt.model_dump()
+    )
+
+    # 4c. Alternative Finder
+    alt_receipt = delegate(
+        agent_name="Alternative Finder",
+        requested_scope=["find_alternatives"],
+        parent_receipt=root_receipt_dict
+    )
+    alternatives_list = []
+    for comp in components:
+        comp_name = comp.get("name", "")
+        alt_items = invoke_tool(
+            agent_name="Alternative Finder",
+            tool_name="find_alternatives",
+            args={"component_name": comp_name},
+            receipt_dict=alt_receipt.model_dump()
+        )
+        comp["alternatives"] = alt_items
+        alternatives_list.append({"component": comp_name, "alternatives": alt_items})
+
+    # 4d. Voltage Checker
+    voltage_receipt = delegate(
+        agent_name="Voltage Checker",
+        requested_scope=["check_voltage_compatibility"],
+        parent_receipt=root_receipt_dict
+    )
+    voltage_res = invoke_tool(
+        agent_name="Voltage Checker",
+        tool_name="check_voltage_compatibility",
+        args={"components": components},
+        receipt_dict=voltage_receipt.model_dump()
+    )
+
+    # 4e. Pin Generator
+    pin_receipt = delegate(
+        agent_name="Pin Generator",
+        requested_scope=["generate_pin_map"],
+        parent_receipt=root_receipt_dict
+    )
+    pin_res = invoke_tool(
+        agent_name="Pin Generator",
+        tool_name="generate_pin_map",
+        args={"components": components},
+        receipt_dict=pin_receipt.model_dump()
+    )
+    
     # 5. Run Research Agent (Allowed Scope)
     research_res = run_research(user_intent, research_receipt.model_dump())
     
-    # 6. Proceed with Validation Agent
+    # 6. Proceed with Validation Agent (Electrical Service embedded)
     validation_receipt = delegate(
         agent_name="Validation Agent",
         requested_scope=["validate_architecture"],
@@ -102,6 +159,19 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         parent_receipt=root_receipt_dict
     )
     export_res = run_export(package_data, export_receipt.model_dump())
+
+    # 9b. BOM Export Engine
+    bom_receipt = delegate(
+        agent_name="BOM Export Engine",
+        requested_scope=["export_bom"],
+        parent_receipt=root_receipt_dict
+    )
+    bom_export_res = invoke_tool(
+        agent_name="BOM Export Engine",
+        tool_name="export_bom",
+        args={"components": components, "cost_summary": cost_res},
+        receipt_dict=bom_receipt.model_dump()
+    )
     
     # 10. Generate Decision Trace Table data
     decision_trace = generate_decision_trace(user_intent)
@@ -120,7 +190,14 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "exports": export_res,
         "decision_trace": decision_trace,
         "audit_trail": list(AUDIT_LOGS), # copy current logs
-        "blocked_test_success": blocked_test_triggered
+        "blocked_test_success": blocked_test_triggered,
+        
+        # New Feature Payloads
+        "cost_summary": cost_res,
+        "alternatives": alternatives_list,
+        "voltage_risks": voltage_res,
+        "pin_mapping": pin_res,
+        "bom_exports": bom_export_res
     }
 
 def generate_decision_trace(intent: str) -> List[Dict[str, str]]:

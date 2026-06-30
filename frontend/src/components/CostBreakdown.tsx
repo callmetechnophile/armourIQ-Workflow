@@ -6,6 +6,8 @@ import { Layers, Calculator, Info } from 'lucide-react';
 interface Alternative {
   alternative: string;
   vendor: string;
+  base_cost?: number;
+  shipping_cost?: number;
   final_cost: number;
   reason: string;
 }
@@ -72,8 +74,8 @@ export default function CostBreakdown({ components, costSummary }: CostBreakdown
         setActivePricing(prev => ({
           ...prev,
           [compName]: {
-            base: alt.final_cost, // Landed cost is used as base, shipping is factored in
-            shipping: 0,
+            base: alt.base_cost !== undefined ? alt.base_cost : alt.final_cost,
+            shipping: alt.shipping_cost !== undefined ? alt.shipping_cost : 0,
             final: alt.final_cost
           }
         }));

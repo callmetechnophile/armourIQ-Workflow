@@ -153,6 +153,8 @@ def find_alternative_components(component_name: str) -> List[Dict[str, Any]]:
             alt_ranked.append({
                 "alternative": alt["name"],
                 "vendor": best["vendor"],
+                "base_cost": best["base_price"],
+                "shipping_cost": best["transport_cost"],
                 "final_cost": best["landed_cost"],
                 "reason": alt.get("reason", "Better efficiency / lower cost")
             })

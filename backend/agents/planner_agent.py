@@ -83,10 +83,14 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
             "component": item["component"],
             "alternatives": [
                 {
+                    "alternative": a["alternative"],
                     "name": a["alternative"],
                     "type": "cheaper" if a["final_cost"] < item["final_cost"] else "upgraded",
                     "reason": a["reason"],
-                    "approx_cost_usd": float(a["final_cost"] / 83.0)
+                    "approx_cost_usd": float(a["final_cost"] / 83.0),
+                    "base_cost": a.get("base_cost", a["final_cost"]),
+                    "shipping_cost": a.get("shipping_cost", 0),
+                    "final_cost": a["final_cost"]
                 } for a in item.get("alternatives", [])
             ]
         })

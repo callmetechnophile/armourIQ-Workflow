@@ -238,24 +238,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     )
     planning_res = run_planning(validation_res, planning_receipt.model_dump())
     
-    # Compile intermediate package state to pass to Export Agent
-    package_data = {
-        "intent": user_intent,
-        "components": components,
-        "validation": validation_res,
-        "optimization": optimization_res,
-        "roadmap": planning_res.get("roadmap", [])
-    }
-    
-    # 9. Invoke Export Agent to build PDF bundle
-    export_receipt = delegate(
-        agent_name="Export Agent",
-        requested_scope=["export_pdf", "export_csv", "export_markdown"],
-        parent_receipt=root_receipt_dict
-    )
-    export_res = run_export(package_data, export_receipt.model_dump())
-
-    # 9b. Procurement BOM Exports (Allowed Scope)
+    # 8b. Procurement BOM Exports (Allowed Scope)
     bom_receipt = delegate(
         agent_name="BOM Export Engine",
         requested_scope=["export_bom"],
@@ -267,6 +250,36 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         args={"components": components, "cost_summary": cost_res},
         receipt_dict=bom_receipt.model_dump()
     )
+
+    # Compile intermediate package state to pass to Export Agent
+    package_data = {
+        "intent": user_intent,
+        "components": components,
+        "validation": validation_res,
+        "optimization": optimization_res,
+        "roadmap": planning_res.get("roadmap", []),
+        "gantt": planning_res.get("gantt", []),
+        "cost_summary": cost_res,
+        "alternatives": alternatives_list,
+        "voltage_risks": voltage_res,
+        "pin_mapping": pin_res,
+        "bom_exports": bom_export_res,
+        "datasheets": datasheets_res,
+        "power_analysis": power_res,
+        "dependency_graph": dependency_res,
+        "wiring_diagram": wiring_res,
+        "papers": ranked_papers,
+        "paper_summary": consolidated_summary,
+        "audit_trail": list(AUDIT_LOGS)
+    }
+    
+    # 9. Invoke Export Agent to build PDF bundle
+    export_receipt = delegate(
+        agent_name="Export Agent",
+        requested_scope=["export_pdf", "export_csv", "export_markdown"],
+        parent_receipt=root_receipt_dict
+    )
+    export_res = run_export(package_data, export_receipt.model_dump())
     
     # 10. Generate Decision Trace Table data
     decision_trace = generate_decision_trace(user_intent)

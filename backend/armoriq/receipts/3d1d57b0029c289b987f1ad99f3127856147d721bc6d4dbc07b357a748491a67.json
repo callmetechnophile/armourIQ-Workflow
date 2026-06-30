@@ -1,0 +1,14 @@
+{
+  "agent": "Research Agent",
+  "parent": "9c7caa24-29a4-46da-b330-4aada81efb6b",
+  "tool": "search_papers",
+  "scope": [
+    "search_papers",
+    "summarize_papers"
+  ],
+  "timestamp": "1782805740.6961558",
+  "hash": "3d1d57b0029c289b987f1ad99f3127856147d721bc6d4dbc07b357a748491a67",
+  "status": "success",
+  "execution_result": "[{'id': 'paper_generic_1', 'title': 'Technical Advancements in Automated Smart greenhouse Engineering Structures', 'authors': 'Dr. E. Benson, P. Wright', 'source': 'OpenAlex', 'url': 'https://openalex.org/generic-paper-link-1', 'publish_year': 2023, 'citation_count': 3}, {'id': 'paper_generic_2', 't...",
+  "authority_chain": "Planner Agent -> Research Agent"
+}

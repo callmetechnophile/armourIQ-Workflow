@@ -1,0 +1,13 @@
+{
+  "agent": "Extraction Agent",
+  "parent": "e6aa64e7-cce3-4109-8fb0-7bed5230a459",
+  "tool": "fetch_datasheets",
+  "scope": [
+    "fetch_datasheets"
+  ],
+  "timestamp": "1782807537.8649309",
+  "hash": "07ca231bed3987a8f0a5ed3520024bb9ca530bba51d000db71cac7416e8f8127",
+  "status": "success",
+  "execution_result": "[{'component': 'ESP32-WROOM-32D Development Board', 'datasheet_link': 'https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf', 'source': 'Espressif Systems (Official)', 'trust_status': 'TRUSTED'}, {'component': 'PCA9685 16-Ch PWM Servo Driver Board', 'datasheet_link': 'h...",
+  "authority_chain": "Planner Agent -> Extraction Agent"
+}

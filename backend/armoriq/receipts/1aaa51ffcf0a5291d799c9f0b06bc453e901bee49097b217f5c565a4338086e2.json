@@ -1,0 +1,13 @@
+{
+  "agent": "Voltage Checker",
+  "parent": "9825cdef-7528-4e0d-b2cd-7c6f91a4e6fc",
+  "tool": "check_voltage_compatibility",
+  "scope": [
+    "check_voltage_compatibility"
+  ],
+  "timestamp": "1782807537.8615904",
+  "hash": "1aaa51ffcf0a5291d799c9f0b06bc453e901bee49097b217f5c565a4338086e2",
+  "status": "success",
+  "execution_result": "[{'component_a': 'ESP32-WROOM-32D Development Board', 'component_b': 'PCA9685 16-Ch PWM Servo Driver Board', 'voltage': '3.3V logic', 'risk': 'SAFE', 'details': 'Logic levels match. Interfaces directly.'}, {'component_a': 'ESP32-WROOM-32D Development Board', 'component_b': '2.2 Inch Resistor Flex Se...",
+  "authority_chain": "Planner Agent -> Voltage Checker"
+}

@@ -1,0 +1,13 @@
+{
+  "agent": "Extraction Agent",
+  "parent": "df12d33f-aa43-413a-bd0a-119dd46eb9f8",
+  "tool": "fetch_datasheets",
+  "scope": [
+    "fetch_datasheets"
+  ],
+  "timestamp": "1782807053.2630484",
+  "hash": "7dc347b14999ba8c312a68b613de59e75a72efc0a0507bc30eebe9fdfc8af568",
+  "status": "success",
+  "execution_result": "[{'component': 'ESP32-WROOM-32D Development Board', 'datasheet_link': 'https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf', 'source': 'Espressif Systems (Official)', 'trust_status': 'TRUSTED'}, {'component': '5V 3A DC Wall Power Adapter', 'datasheet_link': 'https://ww...",
+  "authority_chain": "Planner Agent -> Extraction Agent"
+}

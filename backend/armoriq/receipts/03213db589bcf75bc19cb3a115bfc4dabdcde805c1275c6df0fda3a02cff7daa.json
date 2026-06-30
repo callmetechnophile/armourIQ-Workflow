@@ -1,0 +1,15 @@
+{
+  "agent": "Export Agent",
+  "parent": "e2232903-13f5-4bb2-8ec4-bf7ac6bbc76f",
+  "tool": "export_pdf",
+  "scope": [
+    "export_pdf",
+    "export_csv",
+    "export_markdown"
+  ],
+  "timestamp": "1782807538.002954",
+  "hash": "03213db589bcf75bc19cb3a115bfc4dabdcde805c1275c6df0fda3a02cff7daa",
+  "status": "success",
+  "execution_result": "{'filename': 'BionicHand_System.pdf', 'url': '/api/exports/BionicHand_System.pdf', 'status': 'SUCCESS'}",
+  "authority_chain": "Planner Agent -> Export Agent"
+}

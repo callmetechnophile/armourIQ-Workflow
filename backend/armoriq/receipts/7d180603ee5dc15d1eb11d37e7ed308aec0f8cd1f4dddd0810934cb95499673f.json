@@ -1,0 +1,13 @@
+{
+  "agent": "Research Agent",
+  "parent": "c0f748a5-cc0d-4b37-8d28-3f4350c4ed32",
+  "tool": "rank_papers",
+  "scope": [
+    "rank_papers"
+  ],
+  "timestamp": "1782807053.27249",
+  "hash": "7d180603ee5dc15d1eb11d37e7ed308aec0f8cd1f4dddd0810934cb95499673f",
+  "status": "success",
+  "execution_result": "[{'id': 'paper_generic_1', 'title': 'Technical Advancements in Automated Voice controlled lights Engineering Structures', 'authors': 'Dr. E. Benson, P. Wright', 'source': 'OpenAlex', 'url': 'https://openalex.org/generic-paper-link-1', 'publish_year': 2023, 'citation_count': 3, 'relevance': 10.0, 'no...",
+  "authority_chain": "Planner Agent -> Research Agent"
+}

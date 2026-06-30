@@ -1,0 +1,14 @@
+{
+  "agent": "Planning Agent",
+  "parent": "fed977a6-9a83-4c91-b7b2-31b9e2084d2a",
+  "tool": "generate_gantt",
+  "scope": [
+    "generate_roadmap",
+    "generate_gantt"
+  ],
+  "timestamp": "1782802094.605514",
+  "hash": "18757b9bb629dd621e8d05aa76a5b7555d7a6433f6abeafc8476dd203db444c3",
+  "status": "success",
+  "execution_result": "[{'id': 'task_1', 'name': 'Benchtop Electrical Verification', 'start': '2026-06-30', 'end': '2026-07-05', 'progress': 30, 'dependencies': '', 'deliverable': 'Verified wiring schematic and functional electrical bench test.'}, {'id': 'task_2', 'name': 'Mechanical Fabrication & Airflow Optimization', '...",
+  "authority_chain": "Planner Agent -> Planning Agent"
+}

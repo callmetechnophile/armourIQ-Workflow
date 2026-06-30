@@ -17,7 +17,7 @@ from backend.services.cost_service import calculate_total_cost
 from backend.services.alternative_service import find_alternatives
 from backend.services.electrical_service import check_voltage_compatibility
 from backend.services.pin_service import generate_pin_map
-from backend.services.bom_service import export_bom
+from backend.services.bom_service import export_bom, generate_optimized_bom, calculate_landed_cost, find_alternative_components
 
 # Global in-memory audit log list for quick tracking
 AUDIT_LOGS: List[Dict[str, Any]] = []
@@ -142,6 +142,12 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             result = generate_pin_map(args.get("components", []))
         elif tool_name == "export_bom":
             result = export_bom(args.get("components", []), args.get("cost_summary", {}))
+        elif tool_name == "generate_optimized_bom":
+            result = generate_optimized_bom(args.get("components", []), args.get("mode", "normal"))
+        elif tool_name == "calculate_landed_cost":
+            result = calculate_landed_cost(args.get("component", {}), args.get("mode", "normal"))
+        elif tool_name == "find_alternative_components":
+            result = find_alternative_components(args.get("component_name", ""))
         elif tool_name == "search_papers":
             result = search_papers(args.get("query", ""))
         elif tool_name == "summarize_papers":

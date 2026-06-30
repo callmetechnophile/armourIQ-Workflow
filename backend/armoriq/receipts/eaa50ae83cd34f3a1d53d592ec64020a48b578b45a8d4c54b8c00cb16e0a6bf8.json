@@ -1,0 +1,15 @@
+{
+  "agent": "Export Agent",
+  "parent": "a200c0bd-a8c5-431b-8e99-fa0fdd10d9bb",
+  "tool": "export_markdown",
+  "scope": [
+    "export_pdf",
+    "export_csv",
+    "export_markdown"
+  ],
+  "timestamp": "1782802094.6264772",
+  "hash": "eaa50ae83cd34f3a1d53d592ec64020a48b578b45a8d4c54b8c00cb16e0a6bf8",
+  "status": "failed",
+  "execution_result": "unsupported format string passed to NoneType.__format__",
+  "authority_chain": "Planner Agent -> Export Agent"
+}

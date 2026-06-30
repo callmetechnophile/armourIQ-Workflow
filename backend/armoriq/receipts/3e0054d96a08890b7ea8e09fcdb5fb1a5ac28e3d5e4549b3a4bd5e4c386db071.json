@@ -1,0 +1,13 @@
+{
+  "agent": "Planner Agent",
+  "parent": "6f08794c-0882-4b6b-8abf-796fac282de8",
+  "tool": "export_csv",
+  "scope": [
+    "delegate"
+  ],
+  "timestamp": "1782800142.0905592",
+  "hash": "3e0054d96a08890b7ea8e09fcdb5fb1a5ac28e3d5e4549b3a4bd5e4c386db071",
+  "status": "blocked",
+  "execution_result": "Scope violation: Agent 'Planner Agent' tried to execute 'export_csv'. Allowed scope: ['delegate']. Tool 'export_csv' is not in the delegated scope.",
+  "authority_chain": "Planner Agent"
+}

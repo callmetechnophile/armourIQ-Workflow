@@ -1,0 +1,14 @@
+{
+  "agent": "Retrieval Agent",
+  "parent": "c520df7e-9c64-46e0-b1f9-da0e1c3d8cd4",
+  "tool": "fetch_sources",
+  "scope": [
+    "search_projects",
+    "fetch_sources"
+  ],
+  "timestamp": "1782800496.5805225",
+  "hash": "c852a1113fc557e422a825010eab3957bd569089ab79b89068a852d02f218665",
+  "status": "success",
+  "execution_result": "{'url': 'https://github.com/community-eng/Smart-greenhouse', 'content_markdown': '# Content from source https://github.com/community-eng/Smart-greenhouse\\n\\n## Overview\\nThis project details the mechanical construction and electrical diagram. Key components include a high-efficiency controller, cust...",
+  "authority_chain": "Planner Agent -> Retrieval Agent"
+}

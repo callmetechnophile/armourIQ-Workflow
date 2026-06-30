@@ -59,36 +59,37 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     extraction_res = run_extraction(retrieved_text, extraction_receipt.model_dump())
     components = extraction_res.get("components", [])
     
-    # 4b. Cost Engine
-    cost_receipt = delegate(
-        agent_name="Cost Engine",
-        requested_scope=["calculate_total_cost"],
+    # 4b. BOM Optimization Engine (runs ProcurementAgent)
+    procurement_receipt = delegate(
+        agent_name="ProcurementAgent",
+        requested_scope=["generate_optimized_bom", "calculate_landed_cost", "find_alternative_components"],
         parent_receipt=root_receipt_dict
     )
-    cost_res = invoke_tool(
-        agent_name="Cost Engine",
-        tool_name="calculate_total_cost",
-        args={"components": components},
-        receipt_dict=cost_receipt.model_dump()
+    procurement_res = invoke_tool(
+        agent_name="ProcurementAgent",
+        tool_name="generate_optimized_bom",
+        args={"components": components, "mode": "normal"},
+        receipt_dict=procurement_receipt.model_dump()
     )
-
-    # 4c. Alternative Finder
-    alt_receipt = delegate(
-        agent_name="Alternative Finder",
-        requested_scope=["find_alternatives"],
-        parent_receipt=root_receipt_dict
-    )
+    
+    # Overwrite components with the optimized, platform-ranked BOM items
+    components = procurement_res["bom_items"]
+    cost_res = procurement_res["totals"]
+    
+    # Extract alternatives list for the tabbed drawer display
     alternatives_list = []
-    for comp in components:
-        comp_name = comp.get("name", "")
-        alt_items = invoke_tool(
-            agent_name="Alternative Finder",
-            tool_name="find_alternatives",
-            args={"component_name": comp_name},
-            receipt_dict=alt_receipt.model_dump()
-        )
-        comp["alternatives"] = alt_items
-        alternatives_list.append({"component": comp_name, "alternatives": alt_items})
+    for item in components:
+        alternatives_list.append({
+            "component": item["component"],
+            "alternatives": [
+                {
+                    "name": a["alternative"],
+                    "type": "cheaper" if a["final_cost"] < item["final_cost"] else "upgraded",
+                    "reason": a["reason"],
+                    "approx_cost_usd": float(a["final_cost"] / 83.0)
+                } for a in item.get("alternatives", [])
+            ]
+        })
 
     # 4d. Voltage Checker
     voltage_receipt = delegate(
@@ -96,10 +97,12 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         requested_scope=["check_voltage_compatibility"],
         parent_receipt=root_receipt_dict
     )
+    # Voltage Checker requires component names mapping
+    voltage_components = [{"name": c["component"], "category": c["category"]} for c in components]
     voltage_res = invoke_tool(
         agent_name="Voltage Checker",
         tool_name="check_voltage_compatibility",
-        args={"components": components},
+        args={"components": voltage_components},
         receipt_dict=voltage_receipt.model_dump()
     )
 
@@ -112,7 +115,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     pin_res = invoke_tool(
         agent_name="Pin Generator",
         tool_name="generate_pin_map",
-        args={"components": components},
+        args={"components": voltage_components},
         receipt_dict=pin_receipt.model_dump()
     )
     

@@ -1,0 +1,72 @@
+[
+  {
+    "platform": "Mouser Electronics India",
+    "location": "Bengaluru",
+    "distance_km": 0,
+    "express_delivery": "Free over 3300",
+    "normal_delivery": "N/A"
+  },
+  {
+    "platform": "element14 India",
+    "location": "Bengaluru",
+    "distance_km": 0,
+    "express_delivery": "150-250",
+    "normal_delivery": "80-100"
+  },
+  {
+    "platform": "Robu.in",
+    "location": "Pune",
+    "distance_km": 840,
+    "express_delivery": "99",
+    "normal_delivery": "49 / Free over 999"
+  },
+  {
+    "platform": "Probots Electronics",
+    "location": "Bengaluru",
+    "distance_km": 0,
+    "express_delivery": "150 local",
+    "normal_delivery": "80"
+  },
+  {
+    "platform": "Tomson Electronics",
+    "location": "Ernakulam",
+    "distance_km": 550,
+    "express_delivery": "150-250",
+    "normal_delivery": "80-120"
+  },
+  {
+    "platform": "DigiKey India",
+    "location": "US",
+    "distance_km": 14000,
+    "express_delivery": "Free over 4400",
+    "normal_delivery": "N/A"
+  },
+  {
+    "platform": "Millennium Semiconductors",
+    "location": "Pune",
+    "distance_km": 840,
+    "express_delivery": "Custom Quote",
+    "normal_delivery": "Custom Quote"
+  },
+  {
+    "platform": "Campus Component",
+    "location": "Pune",
+    "distance_km": 840,
+    "express_delivery": "200-250",
+    "normal_delivery": "100-130"
+  },
+  {
+    "platform": "Pantronics India",
+    "location": "Chennai",
+    "distance_km": 350,
+    "express_delivery": "150-200",
+    "normal_delivery": "80-100"
+  },
+  {
+    "platform": "Electronic Spices",
+    "location": "Delhi",
+    "distance_km": 2100,
+    "express_delivery": "250-350",
+    "normal_delivery": "120-150"
+  }
+]

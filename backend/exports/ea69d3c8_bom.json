@@ -1,0 +1,72 @@
+{
+  "bom_items": [
+    {
+      "Component": "Brushless DC Suction Motor (24V, 100K RPM)",
+      "Qty": 1,
+      "Category": "Propulsion / Suction",
+      "Vendor": "Robokits India",
+      "Price": "INR 3735",
+      "Price_Val": 3735,
+      "Stock": "In Stock",
+      "Alternatives": "Brushed DC Suction Motor"
+    },
+    {
+      "Component": "100W Flexible Monocrystalline Solar Panel",
+      "Qty": 1,
+      "Category": "Power Supply",
+      "Vendor": "Amazon India",
+      "Price": "INR 7055",
+      "Price_Val": 7055,
+      "Stock": "In Stock",
+      "Alternatives": "Generic equivalent for 100W Flexible Monocrystalline Solar Panel, Budget alternative for 100W Flexible Monocrystalline Solar Panel"
+    },
+    {
+      "Component": "12V/24V 20A MPPT Solar Charge Controller",
+      "Qty": 1,
+      "Category": "Electronics / Power Control",
+      "Vendor": "Amazon India",
+      "Price": "INR 2490",
+      "Price_Val": 2490,
+      "Stock": "In Stock",
+      "Alternatives": "PWM Solar Charge Controller, LT3652 MPPT Charger"
+    },
+    {
+      "Component": "12.8V 10Ah LiFePO4 Lithium Iron Phosphate Battery Pack",
+      "Qty": 1,
+      "Category": "Energy Storage",
+      "Vendor": "Amazon India",
+      "Price": "INR 7470",
+      "Price_Val": 7470,
+      "Stock": "In Stock",
+      "Alternatives": "11.1V 3S LiPo Battery Pack, Lead-Acid Battery (12V)"
+    },
+    {
+      "Component": "Modular Cyclonic Dust Filter Assembly",
+      "Qty": 1,
+      "Category": "Structural / Mechanical",
+      "Vendor": "Amazon India",
+      "Price": "INR 2075",
+      "Price_Val": 2075,
+      "Stock": "In Stock",
+      "Alternatives": "Generic equivalent for Modular Cyclonic Dust Filter Assembly, Budget alternative for Modular Cyclonic Dust Filter Assembly"
+    },
+    {
+      "Component": "ABS Filament for 3D Printed Housing and Hose Adapters",
+      "Qty": 1,
+      "Category": "Housing & Attachments",
+      "Vendor": "Amazon India",
+      "Price": "INR 1660",
+      "Price_Val": 1660,
+      "Stock": "In Stock",
+      "Alternatives": "Generic equivalent for ABS Filament for 3D Printed Housing and Hose Adapters, Budget alternative for ABS Filament for 3D Printed Housing and Hose Adapters"
+    }
+  ],
+  "cost_summary": {
+    "total_estimated_cost": "INR 24485",
+    "subtotals": {
+      "Electronics": "INR 0",
+      "Mechanical": "INR 7470",
+      "Power": "INR 17015"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "bom_items": [
+    {
+      "Component": "ESP32-WROOM-32D Development Board",
+      "Qty": 1,
+      "Category": "Core Controller",
+      "Vendor": "Amazon India",
+      "Price": "INR 622",
+      "Price_Val": 622,
+      "Stock": "In Stock",
+      "Alternatives": "Arduino Nano, Raspberry Pi Pico W"
+    },
+    {
+      "Component": "5V 3A DC Wall Power Adapter",
+      "Qty": 1,
+      "Category": "Power Supply",
+      "Vendor": "Amazon India",
+      "Price": "INR 996",
+      "Price_Val": 996,
+      "Stock": "In Stock",
+      "Alternatives": "Generic equivalent for 5V 3A DC Wall Power Adapter, Budget alternative for 5V 3A DC Wall Power Adapter"
+    },
+    {
+      "Component": "Laser-cut Acrylic Base Sheet",
+      "Qty": 1,
+      "Category": "Mechanical Frame",
+      "Vendor": "Amazon India",
+      "Price": "INR 1245",
+      "Price_Val": 1245,
+      "Stock": "In Stock",
+      "Alternatives": "Generic equivalent for Laser-cut Acrylic Base Sheet, Budget alternative for Laser-cut Acrylic Base Sheet"
+    },
+    {
+      "Component": "RGB LED status indicators and wires pack",
+      "Qty": 1,
+      "Category": "Indicators",
+      "Vendor": "Amazon India",
+      "Price": "INR 415",
+      "Price_Val": 415,
+      "Stock": "In Stock",
+      "Alternatives": "Generic equivalent for RGB LED status indicators and wires pack, Budget alternative for RGB LED status indicators and wires pack"
+    }
+  ],
+  "cost_summary": {
+    "total_estimated_cost": "INR 3278",
+    "subtotals": {
+      "Electronics": "INR 1037",
+      "Mechanical": "INR 1245",
+      "Power": "INR 996"
+    }
+  }
+}

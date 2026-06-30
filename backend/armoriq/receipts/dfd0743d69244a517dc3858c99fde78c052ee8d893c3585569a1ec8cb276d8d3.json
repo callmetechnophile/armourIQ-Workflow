@@ -1,0 +1,13 @@
+{
+  "agent": "Pin Generator",
+  "parent": "bbd74354-dbd4-42de-85e9-7b6dbd14cadb",
+  "tool": "generate_pin_map",
+  "scope": [
+    "generate_pin_map"
+  ],
+  "timestamp": "1782799966.574347",
+  "hash": "dfd0743d69244a517dc3858c99fde78c052ee8d893c3585569a1ec8cb276d8d3",
+  "status": "success",
+  "execution_result": "[{'component': 'ESP32 Core Module', 'pin': 'GPIO25 (PWM1)', 'connected_to': 'Brushless DC Suction Motor (24V, 100K RPM) (PWM)', 'type': 'PWM'}, {'component': 'ESP32 Core Module', 'pin': 'GPIO26 (PWM2)', 'connected_to': 'Brushless DC Suction Motor (24V, 100K RPM) (Signal)', 'type': 'PWM'}]",
+  "authority_chain": "Planner Agent -> Pin Generator"
+}

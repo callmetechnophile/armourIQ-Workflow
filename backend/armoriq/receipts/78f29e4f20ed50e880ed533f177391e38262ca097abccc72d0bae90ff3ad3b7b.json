@@ -1,0 +1,13 @@
+{
+  "agent": "Cost Engine",
+  "parent": "62c065a7-343d-455f-a618-be66cc0a7aa6",
+  "tool": "calculate_total_cost",
+  "scope": [
+    "calculate_total_cost"
+  ],
+  "timestamp": "1782800032.2309504",
+  "hash": "78f29e4f20ed50e880ed533f177391e38262ca097abccc72d0bae90ff3ad3b7b",
+  "status": "success",
+  "execution_result": "{'total_cost_inr': 24485, 'subtotals_inr': {'Electronics': 0, 'Mechanical': 7470, 'Power': 17015}}",
+  "authority_chain": "Planner Agent -> Cost Engine"
+}

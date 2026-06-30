@@ -10,6 +10,7 @@ AGENT_SCOPES: Dict[str, List[str]] = {
     "Voltage Checker": ["check_voltage_compatibility"],
     "Pin Generator": ["generate_pin_map"],
     "BOM Export Engine": ["export_bom"],
+    "ProcurementAgent": ["generate_optimized_bom", "calculate_landed_cost", "find_alternative_components"],
     "Research Agent": ["search_papers", "summarize_papers"],
     "Validation Agent": ["validate_architecture"],
     "Optimization Agent": ["optimize_components"],

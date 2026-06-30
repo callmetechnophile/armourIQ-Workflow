@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers } from 'lucide-react';
+import { Layers, Download } from 'lucide-react';
 
 interface ComponentItem {
   component: string;
@@ -24,6 +24,35 @@ interface ComponentTableProps {
 export default function ComponentTable({ components }: ComponentTableProps) {
   const totalLandedCost = components.reduce((sum, item) => sum + (item.final_cost || 0), 0);
 
+  const handleExportCSV = () => {
+    const headers = ["Component", "Optimal Vendor", "Base Cost (INR)", "Shipping Cost (INR)", "Distance", "Final Landed Cost (INR)", "Stock Status", "Estimated Delivery (ETA)"];
+    const rows = components.map(item => [
+      `"${item.component.replace(/"/g, '""')}"`,
+      `"${item.selected_vendor.replace(/"/g, '""')}"`,
+      item.base_cost,
+      item.shipping_cost,
+      `"${item.distance}"`,
+      item.final_cost,
+      `"${item.stock}"`,
+      `"${item.eta}"`
+    ]);
+    
+    // Add total row
+    rows.push([]);
+    rows.push(["Grand Landed Total", "", "", "", "", totalLandedCost, "", ""]);
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "optimized_bom_shipping_landed.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!components || components.length === 0 || !components[0].selected_vendor) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-slate-400">
@@ -40,9 +69,18 @@ export default function ComponentTable({ components }: ComponentTableProps) {
           <Layers className="w-5 h-5" />
           Smart BOM Optimization Engine
         </h3>
-        <div className="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-md font-mono">
-          <span>Final Landed Budget:</span>
-          <span className="text-emerald-400 font-bold font-mono text-sm">₹{totalLandedCost.toLocaleString('en-IN')}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-800 hover:bg-cyan-900/40 px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-950/20"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export CSV
+          </button>
+          <div className="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-md font-mono">
+            <span>Final Landed Budget:</span>
+            <span className="text-emerald-400 font-bold font-mono text-sm">₹{totalLandedCost.toLocaleString('en-IN')}</span>
+          </div>
         </div>
       </div>
 

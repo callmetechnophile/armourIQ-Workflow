@@ -83,6 +83,7 @@ export default function Home() {
   const [pptModalOpen, setPptModalOpen] = useState(false);
   const [pptPrompt, setPptPrompt] = useState('');
   const [activeDashboardTab, setActiveDashboardTab] = useState('bom');
+  const [targetDays, setTargetDays] = useState(22);
   const [receiptRefreshTrigger, setReceiptRefreshTrigger] = useState(0);
 
   const isTestingEnv = typeof window !== 'undefined' && 
@@ -427,7 +428,7 @@ ${rawBackground.trim()}
       const response = await fetch(`${apiBase}/api/research`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intent: searchIntent })
+        body: JSON.stringify({ intent: searchIntent, target_days: targetDays })
       });
 
       if (!response.ok) {
@@ -621,6 +622,18 @@ ${rawBackground.trim()}
             </div>
           </div>
 
+          {/* Target Duration Input */}
+          <div className="flex items-center gap-3 text-xs font-mono mb-8 bg-zinc-950/40 border border-zinc-850/60 p-2.5 px-5 rounded-full max-w-sm select-none">
+            <span className="text-slate-400">Target Timeline:</span>
+            <input 
+              type="number" 
+              value={targetDays} 
+              onChange={(e) => setTargetDays(Math.max(4, parseInt(e.target.value) || 4))}
+              className="w-16 bg-zinc-900 border border-zinc-800 rounded px-2.5 py-1 text-center font-bold text-cyan-400 focus:outline-none focus:border-cyan-500" 
+            />
+            <span className="text-slate-500">Days</span>
+          </div>
+
           {/* Suggestions List */}
           <div className="space-y-3 mb-6">
             <span className="text-[10px] text-slate-500 font-mono tracking-widest uppercase block">SUGGESTIONS</span>
@@ -772,7 +785,7 @@ ${rawBackground.trim()}
             </div>
 
             {/* Micro input bar for search from results dashboard */}
-            <div className="flex items-center gap-2 max-w-sm w-full">
+            <div className="flex items-center gap-2 max-w-md w-full">
               <input
                 type="text"
                 value={intent}
@@ -781,9 +794,18 @@ ${rawBackground.trim()}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
                 className="bg-slate-900 border border-slate-800 rounded px-3 py-1.5 text-xs w-full text-slate-100 placeholder-slate-500 outline-none"
               />
+              <div className="flex items-center gap-1 text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded flex-shrink-0 select-none">
+                <span>Days:</span>
+                <input 
+                  type="number" 
+                  value={targetDays} 
+                  onChange={(e) => setTargetDays(Math.max(4, parseInt(e.target.value) || 4))}
+                  className="w-10 bg-transparent border-0 text-center font-bold text-cyan-400 focus:outline-none" 
+                />
+              </div>
               <button
                 onClick={() => handleSearchSubmit()}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded transition-all flex items-center gap-1.5"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded transition-all flex items-center gap-1.5 flex-shrink-0"
               >
                 <RefreshCw className="w-3 h-3" />
                 Query

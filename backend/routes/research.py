@@ -17,7 +17,7 @@ def execute_research(payload: ResearchRequest):
         if not payload.intent.strip():
             raise HTTPException(status_code=400, detail="Engineering intent cannot be empty")
             
-        result = run_engineering_pipeline(payload.intent)
+        result = run_engineering_pipeline(payload.intent, payload.target_days)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Engineering pipeline failed: {str(e)}")

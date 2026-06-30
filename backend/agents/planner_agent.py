@@ -12,7 +12,7 @@ from backend.agents.planning_agent import run_planning
 from backend.agents.export_agent import run_export
 from backend.services.collaboration_service import create_team, get_team_members, get_project_comments, fetch_activity_logs
 
-def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
+def run_engineering_pipeline(user_intent: str, target_days: int = 22) -> Dict[str, Any]:
     # Clear previous audit logs for a fresh research run
     AUDIT_LOGS.clear()
     
@@ -263,7 +263,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         requested_scope=["generate_roadmap", "generate_gantt"],
         parent_receipt=root_receipt_dict
     )
-    planning_res = run_planning(validation_res, planning_receipt.model_dump())
+    planning_res = run_planning(validation_res, planning_receipt.model_dump(), target_days=target_days)
     
     # 8b. Procurement BOM Exports (Allowed Scope)
     bom_receipt = delegate(

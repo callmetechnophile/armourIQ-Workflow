@@ -3,6 +3,7 @@ from typing import List, Dict, Any, Optional
 
 class ResearchRequest(BaseModel):
     intent: str
+    target_days: Optional[int] = 22
 
 class ExportResult(BaseModel):
     filename: str

@@ -183,7 +183,7 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
         elif tool_name == "optimize_components":
             result = optimize_components(args.get("components", []))
         elif tool_name == "generate_roadmap":
-            result = generate_roadmap(args.get("validation_results", {}))
+            result = generate_roadmap(args.get("validation_results", {}), args.get("target_days", 22))
         elif tool_name == "generate_gantt":
             result = generate_gantt(args.get("roadmap", []))
         elif tool_name == "export_pdf":

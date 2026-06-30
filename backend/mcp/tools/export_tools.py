@@ -123,7 +123,7 @@ def generate_project_title(user_query: str) -> str:
         return "".join(w.capitalize() for w in words[:2]) + " System"
     if words:
         return words[0].capitalize() + " System"
-    return "ArmourFlow Project"
+    return "Armourline Project"
 
 
 # ---------------------------------------------------------------------------

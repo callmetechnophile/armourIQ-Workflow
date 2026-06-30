@@ -6,13 +6,15 @@ from fastapi.staticfiles import StaticFiles
 from backend.routes.research import router as research_router
 from backend.routes.packages import router as packages_router
 from backend.routes.workspace import router as workspace_router
+from backend.routes.collaboration import router as collaboration_router
+from backend.routes.versioning import router as versioning_router
 from backend.database import init_db
 
 # Initialize User Storage SQLite Database
 init_db()
 
 app = FastAPI(
-    title="ArmourFlow AI (ArmorIQ Secured)",
+    title="ARMOURLINE",
     description="A cryptographically governed multi-agent engineering research system.",
     version="1.0.0"
 )
@@ -30,6 +32,8 @@ app.add_middleware(
 app.include_router(research_router)
 app.include_router(packages_router)
 app.include_router(workspace_router)
+app.include_router(collaboration_router)
+app.include_router(versioning_router)
 
 EXPORT_DIR = os.path.join(os.path.dirname(__file__), "exports")
 

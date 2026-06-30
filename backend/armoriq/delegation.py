@@ -23,6 +23,12 @@ from backend.services.bom_service import export_bom, generate_optimized_bom, cal
 from backend.services.power_service import calculate_power_budget
 from backend.services.dependency_service import generate_dependency_graph
 from backend.services.wiring_service import generate_wiring_diagram
+
+# Tier 3 Production Grade Services
+from backend.services.collaboration_service import invite_member, assign_role, add_comment
+from backend.services.versioning_service import save_version, rollback_version, fork_project
+from backend.services.thermal_service import analyze_thermal_risk
+from backend.services.contradiction_service import detect_contradictions
 from backend.services.paper_ranking_service import rank_papers
 from backend.services.datasheet_service import fetch_datasheet_links
 from backend.services.connection_chatbot_service import ask_connection_assistant
@@ -188,6 +194,22 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             result = export_markdown(args.get("data", {}))
         elif tool_name == "export_docx":
             result = export_docx(args.get("data", {}))
+        elif tool_name == "invite_member":
+            result = invite_member(args.get("team_id"), args.get("user_id"), args.get("email"), args.get("role"))
+        elif tool_name == "assign_role":
+            result = assign_role(args.get("member_id"), args.get("role"))
+        elif tool_name == "comment":
+            result = add_comment(args.get("project_id"), args.get("section"), args.get("author"), args.get("content"))
+        elif tool_name == "save_version":
+            result = save_version(args.get("project_id"), args.get("version_num"), args.get("data"), args.get("modified_by"), args.get("change_summary"))
+        elif tool_name == "rollback_version":
+            result = rollback_version(args.get("project_id"), args.get("version_num"))
+        elif tool_name == "fork_project":
+            result = fork_project(args.get("project_id"), args.get("version_num"), args.get("new_name"), args.get("user_id"))
+        elif tool_name == "analyze_thermal_risk":
+            result = analyze_thermal_risk(args.get("components", []), args.get("enclosure_temp", 25.0))
+        elif tool_name == "detect_contradictions":
+            result = detect_contradictions(args.get("papers", []))
         else:
             raise ValueError(f"Unknown tool name: {tool_name}")
             

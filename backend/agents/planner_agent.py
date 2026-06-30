@@ -10,6 +10,7 @@ from backend.agents.validation_agent import run_validation
 from backend.agents.optimization_agent import run_optimization
 from backend.agents.planning_agent import run_planning
 from backend.agents.export_agent import run_export
+from backend.services.collaboration_service import create_team, get_team_members, get_project_comments, fetch_activity_logs
 
 def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     # Clear previous audit logs for a fresh research run
@@ -191,6 +192,19 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         receipt_dict=ranking_receipt.model_dump()
     )
 
+    # 5c. [NEW] Research Contradiction Detector
+    contradiction_receipt = delegate(
+        agent_name="ContradictionAgent",
+        requested_scope=["detect_contradictions"],
+        parent_receipt=root_receipt_dict
+    )
+    contradiction_res = invoke_tool(
+        agent_name="ContradictionAgent",
+        tool_name="detect_contradictions",
+        args={"papers": ranked_papers},
+        receipt_dict=contradiction_receipt.model_dump()
+    )
+
     # Only top 3 papers should be deeply analyzed
     top_3_papers = ranked_papers[:3]
     summaries = []
@@ -221,6 +235,19 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         parent_receipt=root_receipt_dict
     )
     validation_res = run_validation(components, user_intent, validation_receipt.model_dump())
+
+    # 6b. [NEW] Thermal Risk Analyzer
+    thermal_receipt = delegate(
+        agent_name="ThermalAgent",
+        requested_scope=["analyze_thermal_risk"],
+        parent_receipt=root_receipt_dict
+    )
+    thermal_res = invoke_tool(
+        agent_name="ThermalAgent",
+        tool_name="analyze_thermal_risk",
+        args={"components": components, "enclosure_temp": 25.0},
+        receipt_dict=thermal_receipt.model_dump()
+    )
     
     # 7. Proceed with Optimization Agent
     optimization_receipt = delegate(
@@ -270,8 +297,76 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "wiring_diagram": wiring_res,
         "papers": ranked_papers,
         "paper_summary": consolidated_summary,
+        "contradictions": contradiction_res,
+        "thermal_analysis": thermal_res,
         "audit_trail": list(AUDIT_LOGS)
     }
+
+    # 8c. [NEW] Versioning Engine
+    from backend.mcp.tools.export_tools import generate_project_title
+    project_id = generate_project_title(user_intent).replace(" ", "_")
+    
+    version_receipt = delegate(
+        agent_name="VersionAgent",
+        requested_scope=["save_version"],
+        parent_receipt=root_receipt_dict
+    )
+    version_res = invoke_tool(
+        agent_name="VersionAgent",
+        tool_name="save_version",
+        args={
+            "project_id": project_id,
+            "version_num": 1,
+            "data": package_data,
+            "modified_by": "engineer_1",
+            "change_summary": f"Generated engineering blueprint for {project_id}"
+        },
+        receipt_dict=version_receipt.model_dump()
+    )
+
+    # 8d. [NEW] Team Workspace Integration
+    collab_receipt = delegate(
+        agent_name="CollaborationAgent",
+        requested_scope=["invite_member", "comment"],
+        parent_receipt=root_receipt_dict
+    )
+    # Ensure a default team exists
+    team_res = create_team(f"Team {project_id}")
+    invite_member_res = invoke_tool(
+        agent_name="CollaborationAgent",
+        tool_name="invite_member",
+        args={
+            "team_id": team_res["id"],
+            "user_id": "engineer_1",
+            "email": "engineer1@armourline.io",
+            "role": "Engineer"
+        },
+        receipt_dict=collab_receipt.model_dump()
+    )
+    
+    # Try adding a default comment for demonstration
+    try:
+        invoke_tool(
+            agent_name="CollaborationAgent",
+            tool_name="comment",
+            args={
+                "project_id": project_id,
+                "section": "Wiring",
+                "author": "engineer_1",
+                "content": "Verify PCA9685 I2C logic level conversion before physical assembly."
+            },
+            receipt_dict=collab_receipt.model_dump()
+        )
+    except Exception:
+        pass
+
+    team_members = get_team_members(team_res["id"])
+    comments = get_project_comments(project_id)
+    activities = fetch_activity_logs(team_res["id"])
+    
+    # Fetch all project versions
+    from backend.services.versioning_service import get_project_versions
+    all_versions = get_project_versions(project_id)
     
     # 9. Invoke Export Agent to build PDF bundle
     export_receipt = delegate(
@@ -300,7 +395,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "audit_trail": list(AUDIT_LOGS), # copy current logs
         "blocked_test_success": blocked_test_triggered,
         
-        # New Feature Payloads
+        # Payloads
         "cost_summary": cost_res,
         "alternatives": alternatives_list,
         "voltage_risks": voltage_res,
@@ -311,7 +406,22 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "datasheets": datasheets_res,
         "power_analysis": power_res,
         "dependency_graph": dependency_res,
-        "wiring_diagram": wiring_res
+        "wiring_diagram": wiring_res,
+        
+        # Tier 3 execution layer features
+        "contradictions": contradiction_res,
+        "thermal_analysis": thermal_res,
+        "team_workspace": {
+            "team_id": team_res["id"],
+            "team_name": team_res["name"],
+            "members": team_members,
+            "comments": comments,
+            "activities": activities
+        },
+        "version_history": {
+            "project_id": project_id,
+            "versions": all_versions
+        }
     }
 
 def generate_decision_trace(intent: str) -> List[Dict[str, str]]:

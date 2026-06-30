@@ -1,0 +1,13 @@
+{
+  "agent": "Voltage Checker",
+  "parent": "e19910b1-34f9-422d-9583-49eac3fee460",
+  "tool": "check_voltage_compatibility",
+  "scope": [
+    "check_voltage_compatibility"
+  ],
+  "timestamp": "1782808250.0112944",
+  "hash": "cb1ecc40f40918086349a61831ff82897472f610cd77306f7b8451a2bdfbb635",
+  "status": "success",
+  "execution_result": "[{'component_a': 'System Power Rail', 'component_b': 'Controller VCC', 'voltage': '5.0V / 3.3V', 'risk': 'SAFE', 'details': 'Common ground and voltage rails aligned.'}]",
+  "authority_chain": "Planner Agent -> Voltage Checker"
+}

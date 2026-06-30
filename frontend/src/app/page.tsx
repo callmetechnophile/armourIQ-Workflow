@@ -33,6 +33,13 @@ import DatasheetPanel from '@/components/DatasheetPanel';
 import ConnectionChatbot from '@/components/ConnectionChatbot';
 import WorkspaceDashboard from '@/components/WorkspaceDashboard';
 
+// Tier 3 Components
+import TeamWorkspace from '@/components/TeamWorkspace';
+import VersionHistory from '@/components/VersionHistory';
+import ContradictionViewer from '@/components/ContradictionViewer';
+import ThermalRiskPanel from '@/components/ThermalRiskPanel';
+import ProcurementHeatmap from '@/components/ProcurementHeatmap';
+
 const DASHBOARD_TABS = [
   { id: "bom", label: "BOM" },
   { id: "power", label: "Power Analysis" },
@@ -40,6 +47,11 @@ const DASHBOARD_TABS = [
   { id: "wiring", label: "Wiring Diagram" },
   { id: "datasheets", label: "Datasheets" },
   { id: "papers", label: "Research Papers" },
+  { id: "contradictions", label: "Research Conflicts" },
+  { id: "thermal", label: "Thermal Analysis" },
+  { id: "heatmap", label: "Procurement Heatmap" },
+  { id: "team_workspace", label: "Team Workspace" },
+  { id: "version_history", label: "Version History" },
   { id: "assistant", label: "Connection Assistant" },
   { id: "workspace", label: "Saved Workspace" },
   { id: "delegation", label: "Delegation Scope" },
@@ -80,7 +92,7 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const count = parseInt(localStorage.getItem('armourflow_guest_usage') || '0', 10);
+      const count = parseInt(localStorage.getItem('armourline_guest_usage') || '0', 10);
       setUsageCount(count);
     }
   }, []);
@@ -89,7 +101,7 @@ export default function Home() {
     const newCount = usageCount + 1;
     setUsageCount(newCount);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('armourflow_guest_usage', newCount.toString());
+      localStorage.setItem('armourline_guest_usage', newCount.toString());
     }
   };
   
@@ -233,7 +245,7 @@ export default function Home() {
   const handleGeneratePPT = () => {
     if (!pipelineData) return;
     
-    const projectName = (pipelineData.intent || intent || "ARMOURFLOW AI").toUpperCase();
+    const projectName = (pipelineData.intent || intent || "ARMOURLINE AI").toUpperCase();
     const coreVibe = "Cyberpunk dark-mode blueprint tech console, glowing cyan and electric blue accents, neon red alerts";
     const targetAudience = "Investors, Product Managers, Engineers, Security Auditors";
     
@@ -287,7 +299,7 @@ ${rawBackground.trim()}
 
 [Column 2]
 **The Opportunity**
-* ARMOURFLOW AI leverages 8 sequenced agents to automate research, optimize component sourcing, enforce runtime safety policies, and provide live design guidance.
+* ARMOURLINE AI leverages 8 sequenced agents to automate research, optimize component sourcing, enforce runtime safety policies, and provide live design guidance.
 
 *Visual Note: Use a split screen layout. High-contrast colors to separate the problem from the solution.*
 
@@ -536,7 +548,7 @@ ${rawBackground.trim()}
           {/* Brand Logo Icon */}
           <img 
             src="/icon.png" 
-            alt="ArmourFlow AI Logo" 
+            alt="Armourline AI Logo" 
             className="w-20 h-20 md:w-24 md:h-24 mb-3 object-contain" 
           />
 
@@ -544,7 +556,7 @@ ${rawBackground.trim()}
           <h1 className={`font-mono tracking-[0.25em] text-4xl md:text-6xl font-black uppercase transition-colors duration-300 ${
             isLightMode ? "text-slate-900" : "text-slate-100"
           }`}>
-            ARMOURFLOW AI
+            ARMOURLINE AI
           </h1>
 
           {/* Subtitle */}
@@ -752,7 +764,7 @@ ${rawBackground.trim()}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-950/80 border border-zinc-850 p-4 rounded-lg backdrop-blur-md">
             <div>
               <div className="text-xs font-mono tracking-widest text-cyan-400 font-extrabold uppercase">
-                ArmourFlow AI (ArmorIQ)
+                Armourline AI (ArmorIQ)
               </div>
               <h2 className="text-sm font-bold text-slate-100 mt-1">
                 Engineering Spec: <span className="text-slate-300 italic">"{pipelineData.intent}"</span>
@@ -848,6 +860,45 @@ ${rawBackground.trim()}
                   summary={pipelineData.paper_summary} 
                   intent={intent || pipelineData.intent}
                   apiBase={apiBase}
+                />
+              )}
+              {activeDashboardTab === 'contradictions' && (
+                <ContradictionViewer contradictions={pipelineData.contradictions} />
+              )}
+              {activeDashboardTab === 'thermal' && (
+                <ThermalRiskPanel thermalReports={pipelineData.thermal_analysis} />
+              )}
+              {activeDashboardTab === 'heatmap' && (
+                <ProcurementHeatmap components={pipelineData.components} />
+              )}
+              {activeDashboardTab === 'team_workspace' && (
+                <TeamWorkspace 
+                  teamData={pipelineData.team_workspace} 
+                  projectId={pipelineData.version_history?.project_id} 
+                  apiBase={apiBase} 
+                />
+              )}
+              {activeDashboardTab === 'version_history' && (
+                <VersionHistory 
+                  versionData={pipelineData.version_history} 
+                  apiBase={apiBase}
+                  onRefresh={async () => {
+                    try {
+                      const res = await fetch(`${apiBase}/api/versioning/versions/${pipelineData.version_history.project_id}`);
+                      if (res.ok) {
+                        const list = await res.json();
+                        setPipelineData({
+                          ...pipelineData,
+                          version_history: {
+                            ...pipelineData.version_history,
+                            versions: list
+                          }
+                        });
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
                 />
               )}
               {activeDashboardTab === 'assistant' && (
@@ -963,7 +1014,7 @@ ${rawBackground.trim()}
           <div className="glass-panel p-8 max-w-md w-full border border-blue-500/30 bg-zinc-950/90 text-center shadow-2xl space-y-6">
             <img 
               src="/icon.png" 
-              alt="ArmourFlow AI Logo" 
+              alt="Armourline AI Logo" 
               className="w-16 h-16 mx-auto object-contain animate-pulse" 
             />
             <div className="space-y-2">

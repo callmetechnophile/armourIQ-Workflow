@@ -71,6 +71,61 @@ def init_db():
                 timestamp TEXT NOT NULL
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS teams (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS members (
+                id SERIAL PRIMARY KEY,
+                team_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                email TEXT NOT NULL,
+                role TEXT NOT NULL,
+                joined_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS roles (
+                id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL,
+                permissions TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS comments (
+                id SERIAL PRIMARY KEY,
+                project_id TEXT NOT NULL,
+                section TEXT NOT NULL,
+                author TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id SERIAL PRIMARY KEY,
+                team_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                action TEXT NOT NULL,
+                details TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS project_versions (
+                id SERIAL PRIMARY KEY,
+                project_id TEXT NOT NULL,
+                version_num INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                modified_by TEXT NOT NULL,
+                change_summary TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
     else:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS packages (
@@ -102,6 +157,69 @@ def init_db():
                 timestamp TEXT NOT NULL
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS teams (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS members (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                team_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                email TEXT NOT NULL,
+                role TEXT NOT NULL,
+                joined_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS roles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                permissions TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id TEXT NOT NULL,
+                section TEXT NOT NULL,
+                author TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                team_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                action TEXT NOT NULL,
+                details TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS project_versions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id TEXT NOT NULL,
+                version_num INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                modified_by TEXT NOT NULL,
+                change_summary TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        # Insert default roles into roles table
+        try:
+            cursor.execute("INSERT OR IGNORE INTO roles (name, permissions) VALUES ('Owner', 'full')")
+            cursor.execute("INSERT OR IGNORE INTO roles (name, permissions) VALUES ('Engineer', 'technical')")
+            cursor.execute("INSERT OR IGNORE INTO roles (name, permissions) VALUES ('Reviewer', 'comment')")
+            cursor.execute("INSERT OR IGNORE INTO roles (name, permissions) VALUES ('Viewer', 'read')")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 

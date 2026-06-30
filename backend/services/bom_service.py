@@ -42,6 +42,8 @@ def search_component_sources(component_name: str, cost_usd: float = 10.0) -> Lis
         url = f"https://www.{platform_clean}.in/search?q={component_name.replace(' ', '+')}"
         if "digikey" in platform_clean:
             url = f"https://www.digikey.in/en/products?keywords={component_name.replace(' ', '+')}"
+        elif "element14" in platform_clean:
+            url = f"https://in.element14.com/search?q={component_name.replace(' ', '+')}"
             
         sources.append({
             "component": component_name,

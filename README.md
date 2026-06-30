@@ -299,34 +299,7 @@ Assign the PostgreSQL database connection string to `DATABASE_URL` in the produc
 
 ---
 
-## 19. Screenshots
-
-Below are placeholders for primary dashboard layouts:
-
-#### Landing Page
-![Landing Page](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/landing.png)
-
-#### BOM Sourcing Dashboard
-![BOM Dashboard](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/bom.png)
-
-#### Cryptographic Audit Trail
-![Audit Trail](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/audit.png)
-
-#### Pin Wiring Diagram
-![Wiring Diagram](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/wiring.png)
-
-#### Power Analysis Report
-![Power Analysis](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/power.png)
-
-#### Research Summary
-![Research Dashboard](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/research.png)
-
-#### Gantt Roadmap Timeline
-![Gantt Dashboard](https://raw.githubusercontent.com/callmetechnophile/armourIQ-Workflow/main/docs/screenshots/gantt.png)
-
----
-
-## 20. Future Scope
+## 19. Future Scope
 
 - **3D CAD Integrations**: Direct exports to SolidWorks or Fusion 360 enclosures based on structural component layouts.
 - **Physics Simulation Engine**: Simulated electrical circuits and load stress testing before physical ordering.
@@ -335,7 +308,7 @@ Below are placeholders for primary dashboard layouts:
 
 ---
 
-## 21. Contribution Guide
+## 20. Contribution Guide
 
 We welcome contributions to WorkflowGuide AI!
 
@@ -350,7 +323,7 @@ We welcome contributions to WorkflowGuide AI!
 
 ---
 
-## 22. License
+## 21. License
 
 This project is licensed under the MIT License. See `LICENSE` for details.
 

@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from backend.routes.research import router as research_router
 from backend.routes.packages import router as packages_router
+from backend.routes.workspace import router as workspace_router
 from backend.database import init_db
 
 # Initialize User Storage SQLite Database
@@ -28,6 +29,7 @@ app.add_middleware(
 # Include sub-routes
 app.include_router(research_router)
 app.include_router(packages_router)
+app.include_router(workspace_router)
 
 EXPORT_DIR = os.path.join(os.path.dirname(__file__), "exports")
 

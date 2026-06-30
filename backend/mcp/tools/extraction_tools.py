@@ -86,6 +86,51 @@ def extract_components(raw_text: str) -> List[Dict[str, Any]]:
                 "notes": "Allows real-time ground control station monitoring up to 5km."
             }
         ]
+    elif "hand" in text_lower or "bionic" in text_lower or "robotic" in text_lower:
+        return [
+            {
+                "category": "Core Controller",
+                "name": "ESP32-WROOM-32D Development Board",
+                "cost": 7.50,
+                "notes": "Dual-core processor with Wi-Fi/Bluetooth for hand gestures and wireless glove inputs."
+            },
+            {
+                "category": "Servo Driver",
+                "name": "PCA9685 16-Ch PWM Servo Driver Board",
+                "cost": 5.50,
+                "notes": "I2C interface to control up to 16 servos independently, reducing GPIO pin usage."
+            },
+            {
+                "category": "Actuators",
+                "name": "SG90 9g Micro Servo Motors (5x Set)",
+                "cost": 15.00,
+                "notes": "Actuates individual fingers using tensioned wire cables."
+            },
+            {
+                "category": "Actuators",
+                "name": "MG996R High-Torque Metal Gear Servo Motor",
+                "cost": 9.50,
+                "notes": "Wrist flexion and extension actuation with high holding torque."
+            },
+            {
+                "category": "Power Source",
+                "name": "7.4V 2S 2200mAh 25C LiPo Battery Pack",
+                "cost": 18.00,
+                "notes": "High discharge capability to supply transient current demands of multiple active servos."
+            },
+            {
+                "category": "Mechanical Frame",
+                "name": "PLA Filament for 3D Printed Robotic Hand Structure",
+                "cost": 16.00,
+                "notes": "Chassis structures, fingers links, wrist mount components."
+            },
+            {
+                "category": "Sensors",
+                "name": "2.2 Inch Resistor Flex Sensors (5x Set)",
+                "cost": 25.00,
+                "notes": "Glove sensor array to measure finger bends and send analog control signals."
+            }
+        ]
     else:
         # Generic engineering BOM
         return [

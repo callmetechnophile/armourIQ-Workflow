@@ -1,0 +1,13 @@
+{
+  "agent": "Voltage Checker",
+  "parent": "873efcf6-8cd4-4bd5-8ad7-25e95e657314",
+  "tool": "calculate_power_budget",
+  "scope": [
+    "calculate_power_budget"
+  ],
+  "timestamp": "1782805671.1356783",
+  "hash": "94ab9b2cee3ec6dcd4b7be56e6513c267e445ce3ae7637bb04ac9ebf7cf325aa",
+  "status": "success",
+  "execution_result": "{'power_items': [{'component': 'ESP32-WROOM-32D Development Board', 'voltage': 3.3, 'nominal_current': 80.0, 'peak_current': 240.0, 'standby_current': 0.015, 'is_source': False}, {'component': 'PCA9685 16-Ch PWM Servo Driver Board', 'voltage': 5.0, 'nominal_current': 10.0, 'peak_current': 15.0, 'sta...",
+  "authority_chain": "Planner Agent -> Voltage Checker"
+}

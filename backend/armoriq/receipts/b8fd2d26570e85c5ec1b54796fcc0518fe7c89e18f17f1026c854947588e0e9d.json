@@ -1,0 +1,15 @@
+{
+  "agent": "Export Agent",
+  "parent": "067b0794-58f4-4613-a742-0fd47346643a",
+  "tool": "export_pdf",
+  "scope": [
+    "export_pdf",
+    "export_csv",
+    "export_markdown"
+  ],
+  "timestamp": "1782803334.3335216",
+  "hash": "b8fd2d26570e85c5ec1b54796fcc0518fe7c89e18f17f1026c854947588e0e9d",
+  "status": "success",
+  "execution_result": "{'filename': 'package_7077facc.pdf', 'url': '/api/exports/package_7077facc.pdf', 'status': 'SUCCESS'}",
+  "authority_chain": "Planner Agent -> Export Agent"
+}

@@ -1,0 +1,15 @@
+{
+  "agent": "Export Agent",
+  "parent": "2bd09255-21f5-44d5-836b-4d74a32ad38f",
+  "tool": "export_pdf",
+  "scope": [
+    "export_pdf",
+    "export_csv",
+    "export_markdown"
+  ],
+  "timestamp": "1782803451.5198112",
+  "hash": "72d1a5248731828cc86fa8a42bf2cb2df3aaeb02d197fdd47f162822a0d4b25a",
+  "status": "success",
+  "execution_result": "{'filename': 'package_0b98507e.pdf', 'url': '/api/exports/package_0b98507e.pdf', 'status': 'SUCCESS'}",
+  "authority_chain": "Planner Agent -> Export Agent"
+}

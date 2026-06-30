@@ -1,0 +1,13 @@
+{
+  "agent": "Extraction Agent",
+  "parent": "6b5b49f5-3aa6-409f-9222-286248ce6f91",
+  "tool": "extract_components",
+  "scope": [
+    "extract_components"
+  ],
+  "timestamp": "1782805578.9232428",
+  "hash": "20d93003e3f3752fa2b55d6babcbf5d752a0d49640fedfcf6371a6c8d33f27ba",
+  "status": "success",
+  "execution_result": "[{'category': 'Core Controller', 'name': 'ESP32-WROOM-32D Development Board', 'cost': 7.5, 'notes': 'Dual-core processor with Wi-Fi/Bluetooth for hand gestures and wireless glove inputs.'}, {'category': 'Servo Driver', 'name': 'PCA9685 16-Ch PWM Servo Driver Board', 'cost': 5.5, 'notes': 'I2C interf...",
+  "authority_chain": "Planner Agent -> Extraction Agent"
+}

@@ -25,15 +25,26 @@ import VoltageRiskTable from '@/components/VoltageRiskTable';
 import PinMappingTable from '@/components/PinMappingTable';
 import BOMExportPanel from '@/components/BOMExportPanel';
 
+// Tier 2 Components
+import PowerAnalysis from '@/components/PowerAnalysis';
+import DependencyGraph from '@/components/DependencyGraph';
+import WiringDiagram from '@/components/WiringDiagram';
+import DatasheetPanel from '@/components/DatasheetPanel';
+import ConnectionChatbot from '@/components/ConnectionChatbot';
+import WorkspaceDashboard from '@/components/WorkspaceDashboard';
+
 const DASHBOARD_TABS = [
+  { id: "bom", label: "BOM" },
+  { id: "power", label: "Power Analysis" },
+  { id: "dependency", label: "Dependency Graph" },
+  { id: "wiring", label: "Wiring Diagram" },
+  { id: "datasheets", label: "Datasheets" },
+  { id: "papers", label: "Research Papers" },
+  { id: "assistant", label: "Connection Assistant" },
+  { id: "workspace", label: "Saved Workspace" },
   { id: "delegation", label: "Delegation Scope" },
   { id: "receipts", label: "Receipts" },
-  { id: "violations", label: "Violations" },
-  { id: "cost", label: "Cost Breakdown" },
-  { id: "alternatives", label: "Alternatives" },
-  { id: "voltage", label: "Voltage Risks" },
-  { id: "pins", label: "Pin Mapping" },
-  { id: "bom", label: "BOM Export" }
+  { id: "violations", label: "Violations" }
 ];
 
 const SUGGESTIONS = [
@@ -59,7 +70,7 @@ export default function Home() {
   const [usageCount, setUsageCount] = useState(0);
   const [pptModalOpen, setPptModalOpen] = useState(false);
   const [pptPrompt, setPptPrompt] = useState('');
-  const [activeDashboardTab, setActiveDashboardTab] = useState('delegation');
+  const [activeDashboardTab, setActiveDashboardTab] = useState('bom');
   const [receiptRefreshTrigger, setReceiptRefreshTrigger] = useState(0);
 
   const isTestingEnv = typeof window !== 'undefined' && 
@@ -785,27 +796,7 @@ ${rawBackground.trim()}
           {/* Scope Violation Enforcer block display */}
           <ScopeViolation logs={pipelineData.audit_trail} />
 
-          {/* Components BOM */}
-          <ComponentTable components={pipelineData.components} />
-
-          {/* Research papers panels */}
-          <ResearchPapers 
-            papers={pipelineData.papers} 
-            summary={pipelineData.paper_summary} 
-            intent={intent || pipelineData.intent}
-            apiBase={apiBase}
-          />
-
-          {/* Decision Trace details */}
-          <DecisionTrace decisions={pipelineData.decision_trace} />
-
-          {/* Gantt Schedule roadmap */}
-          <GanttRoadmap 
-            roadmap={pipelineData.roadmap} 
-            gantt={pipelineData.gantt} 
-          />
-
-          {/* Tier 1 Feature Tabbed Dashboard */}
+          {/* Tier 1 & Tier 2 Feature Tabbed Dashboard */}
           <div className="glass-panel p-6 border border-slate-800 bg-slate-950/40 space-y-6">
             <div className="flex border-b border-slate-800 overflow-x-auto gap-2 pb-px scrollbar-none">
               {DASHBOARD_TABS.map((tab) => (
@@ -824,6 +815,62 @@ ${rawBackground.trim()}
             </div>
 
             <div className="transition-all duration-300">
+              {activeDashboardTab === 'bom' && (
+                <div className="space-y-6">
+                  <ComponentTable components={pipelineData.components} />
+                  <CostBreakdown components={pipelineData.components} costSummary={pipelineData.cost_summary} />
+                  <AlternativeComponents components={pipelineData.components} />
+                  <VoltageRiskTable risks={pipelineData.voltage_risks} />
+                  <PinMappingTable pins={pipelineData.pin_mapping} />
+                  <BOMExportPanel apiBase={apiBase} exports={pipelineData.bom_exports} />
+                  <DecisionTrace decisions={pipelineData.decision_trace} />
+                  <GanttRoadmap 
+                    roadmap={pipelineData.roadmap} 
+                    gantt={pipelineData.gantt} 
+                  />
+                </div>
+              )}
+              {activeDashboardTab === 'power' && (
+                <PowerAnalysis data={pipelineData.power_analysis} />
+              )}
+              {activeDashboardTab === 'dependency' && (
+                <DependencyGraph data={pipelineData.dependency_graph} />
+              )}
+              {activeDashboardTab === 'wiring' && (
+                <WiringDiagram data={pipelineData.wiring_diagram} />
+              )}
+              {activeDashboardTab === 'datasheets' && (
+                <DatasheetPanel datasheets={pipelineData.datasheets} />
+              )}
+              {activeDashboardTab === 'papers' && (
+                <ResearchPapers 
+                  papers={pipelineData.papers} 
+                  summary={pipelineData.paper_summary} 
+                  intent={intent || pipelineData.intent}
+                  apiBase={apiBase}
+                />
+              )}
+              {activeDashboardTab === 'assistant' && (
+                <ConnectionChatbot 
+                  projectContext={{
+                    bom: pipelineData.components,
+                    wiring: pipelineData.wiring_diagram,
+                    power: pipelineData.power_analysis,
+                    datasheets: pipelineData.datasheets
+                  }}
+                />
+              )}
+              {activeDashboardTab === 'workspace' && (
+                <WorkspaceDashboard 
+                  activeProjectName={pipelineData.intent || ""}
+                  currentData={pipelineData}
+                  onLoadProject={(data) => {
+                    setPipelineData(data);
+                    setIntent(data.name || data.intent);
+                  }}
+                  onSaveTrigger={async (name) => {}}
+                />
+              )}
               {activeDashboardTab === 'delegation' && (
                 <DelegationScopeViewer logs={pipelineData.audit_trail} />
               )}
@@ -835,21 +882,6 @@ ${rawBackground.trim()}
                   apiBase={apiBase} 
                   onViolationTriggered={() => setReceiptRefreshTrigger(prev => prev + 1)} 
                 />
-              )}
-              {activeDashboardTab === 'cost' && (
-                <CostBreakdown components={pipelineData.components} costSummary={pipelineData.cost_summary} />
-              )}
-              {activeDashboardTab === 'alternatives' && (
-                <AlternativeComponents components={pipelineData.components} />
-              )}
-              {activeDashboardTab === 'voltage' && (
-                <VoltageRiskTable risks={pipelineData.voltage_risks} />
-              )}
-              {activeDashboardTab === 'pins' && (
-                <PinMappingTable pins={pipelineData.pin_mapping} />
-              )}
-              {activeDashboardTab === 'bom' && (
-                <BOMExportPanel apiBase={apiBase} exports={pipelineData.bom_exports} />
               )}
             </div>
           </div>

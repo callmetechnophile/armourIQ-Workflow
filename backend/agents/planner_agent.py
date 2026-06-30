@@ -122,9 +122,97 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         args={"components": voltage_components},
         receipt_dict=pin_receipt.model_dump()
     )
+
+    # 4f. [NEW] Datasheet Intelligence
+    datasheet_receipt = delegate(
+        agent_name="Extraction Agent",
+        requested_scope=["fetch_datasheets"],
+        parent_receipt=root_receipt_dict
+    )
+    datasheets_res = invoke_tool(
+        agent_name="Extraction Agent",
+        tool_name="fetch_datasheets",
+        args={"components": components},
+        receipt_dict=datasheet_receipt.model_dump()
+    )
+
+    # 4g. [NEW] Power Budget Calculator
+    power_receipt = delegate(
+        agent_name="Voltage Checker",
+        requested_scope=["calculate_power_budget"],
+        parent_receipt=root_receipt_dict
+    )
+    power_res = invoke_tool(
+        agent_name="Voltage Checker",
+        tool_name="calculate_power_budget",
+        args={"components": components},
+        receipt_dict=power_receipt.model_dump()
+    )
+
+    # 4h. [NEW] Dependency Graph Generator
+    dependency_receipt = delegate(
+        agent_name="Planner Agent",
+        requested_scope=["generate_dependency_graph"],
+        parent_receipt=root_receipt_dict
+    )
+    dependency_res = invoke_tool(
+        agent_name="Planner Agent",
+        tool_name="generate_dependency_graph",
+        args={"components": components},
+        receipt_dict=dependency_receipt.model_dump()
+    )
+
+    # 4i. [NEW] Wiring Diagram Generator
+    wiring_receipt = delegate(
+        agent_name="Pin Generator",
+        requested_scope=["generate_wiring_diagram"],
+        parent_receipt=root_receipt_dict
+    )
+    wiring_res = invoke_tool(
+        agent_name="Pin Generator",
+        tool_name="generate_wiring_diagram",
+        args={"components": components},
+        receipt_dict=wiring_receipt.model_dump()
+    )
     
     # 5. Run Research Agent (Allowed Scope)
     research_res = run_research(user_intent, research_receipt.model_dump())
+
+    # 5b. [NEW] Research Paper Ranking Engine
+    ranking_receipt = delegate(
+        agent_name="Research Agent",
+        requested_scope=["rank_papers"],
+        parent_receipt=root_receipt_dict
+    )
+    ranked_papers = invoke_tool(
+        agent_name="Research Agent",
+        tool_name="rank_papers",
+        args={"papers": research_res.get("papers", []), "query": user_intent},
+        receipt_dict=ranking_receipt.model_dump()
+    )
+
+    # Only top 3 papers should be deeply analyzed
+    top_3_papers = ranked_papers[:3]
+    summaries = []
+    for paper in top_3_papers:
+        paper_sum = invoke_tool(
+            agent_name="Research Agent",
+            tool_name="summarize_papers",
+            args={"paper_id": paper["id"]},
+            receipt_dict=research_receipt.model_dump()
+        )
+        if paper_sum:
+            summaries.append(
+                f"### {paper['title']} ({paper.get('publish_year', paper.get('year', 2020))})\n"
+                f"* **Score**: {paper['score']}/100\n"
+                f"* **Summary**: {paper_sum.get('summary', '')}\n"
+                f"* **Key Finding**: {paper_sum.get('key_finding', '')}"
+            )
+            
+    consolidated_summary = {
+        "summary": "\n\n".join(summaries) if summaries else "No papers selected for deep summary.",
+        "key_finding": "Consolidated literature shows reliable, peer-reviewed engineering paths."
+    }
     
     # 6. Proceed with Validation Agent (Electrical Service embedded)
     validation_receipt = delegate(
@@ -159,7 +247,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "roadmap": planning_res.get("roadmap", [])
     }
     
-    # 9. Proceed with Export Agent
+    # 9. Invoke Export Agent to build PDF bundle
     export_receipt = delegate(
         agent_name="Export Agent",
         requested_scope=["export_pdf", "export_csv", "export_markdown"],
@@ -167,7 +255,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     )
     export_res = run_export(package_data, export_receipt.model_dump())
 
-    # 9b. BOM Export Engine
+    # 9b. Procurement BOM Exports (Allowed Scope)
     bom_receipt = delegate(
         agent_name="BOM Export Engine",
         requested_scope=["export_bom"],
@@ -188,8 +276,8 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "intent": user_intent,
         "components": components,
         "projects": retrieval_res.get("projects", []),
-        "papers": research_res.get("papers", []),
-        "paper_summary": research_res.get("summary_details", {}),
+        "papers": ranked_papers,
+        "paper_summary": consolidated_summary,
         "validation": validation_res,
         "optimization": optimization_res,
         "roadmap": planning_res.get("roadmap", []),
@@ -204,7 +292,13 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
         "alternatives": alternatives_list,
         "voltage_risks": voltage_res,
         "pin_mapping": pin_res,
-        "bom_exports": bom_export_res
+        "bom_exports": bom_export_res,
+        
+        # Tier 2 execution layer features
+        "datasheets": datasheets_res,
+        "power_analysis": power_res,
+        "dependency_graph": dependency_res,
+        "wiring_diagram": wiring_res
     }
 
 def generate_decision_trace(intent: str) -> List[Dict[str, str]]:

@@ -5,6 +5,25 @@ def validate_architecture(components: List[Dict[str, Any]], concept: str) -> Dic
     contradictions = []
     validation_checks = []
     
+    # Calculate power budget and inject warnings
+    from backend.services.power_service import calculate_power_budget
+    power_res = calculate_power_budget(components)
+    power_warnings = power_res.get("warnings", [])
+    
+    for w in power_warnings:
+        validation_checks.append({
+            "check": "Power constraint safety audit",
+            "status": "WARNING" if "Insufficient" in w or "Mismatch" in w else "CRITICAL",
+            "details": w
+        })
+        if "Overcurrent" in w or "Mismatch" in w:
+            contradictions.append({
+                "conflict": "Electrical / Power Contradiction",
+                "severity": "CRITICAL" if "Overcurrent" in w else "MEDIUM",
+                "explanation": w,
+                "mitigation": "Add logic level translators, upgrade cell capacity, or isolate logic ground."
+            })
+
     # Analyze power matches, structural load limits, etc.
     if "solar" in concept_lower or "vacuum" in concept_lower:
         validation_checks.append({

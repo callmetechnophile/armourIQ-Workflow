@@ -3,54 +3,130 @@ import sqlite3
 import json
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "user_storage.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db_connection():
+    if DATABASE_URL and (DATABASE_URL.startswith("postgres://") or DATABASE_URL.startswith("postgresql://")):
+        try:
+            import psycopg2
+            url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+            conn = psycopg2.connect(url)
+            # Set cursor factory attribute helper
+            conn.cursor_factory = True
+            return conn
+        except Exception as e:
+            print(f"[DB] PostgreSQL connection failed: {e}. Falling back to SQLite.")
+            
+    DB_PATH = os.path.join(os.path.dirname(__file__), "user_storage.db")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_cursor(conn):
+    if hasattr(conn, "cursor_factory"):
+        from psycopg2.extras import RealDictCursor
+        return conn.cursor(cursor_factory=RealDictCursor)
+    return conn.cursor()
+
+def execute_query(conn, query: str, params=()):
+    cursor = get_cursor(conn)
+    if hasattr(conn, "cursor_factory"):
+        query = query.replace("?", "%s")
+    cursor.execute(query, params)
+    return cursor
+
 def init_db():
     conn = get_db_connection()
+    is_postgres = hasattr(conn, "cursor_factory")
     cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS packages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL,
-            intent TEXT NOT NULL,
-            readiness_score INTEGER NOT NULL,
-            risk_score INTEGER NOT NULL,
-            optimization_score INTEGER NOT NULL,
-            data TEXT NOT NULL,
-            timestamp TEXT NOT NULL
-        )
-    """)
+    
+    if is_postgres:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS packages (
+                id SERIAL PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                intent TEXT NOT NULL,
+                readiness_score INTEGER NOT NULL,
+                risk_score INTEGER NOT NULL,
+                optimization_score INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS projects (
+                id SERIAL PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                prompt TEXT NOT NULL,
+                bom TEXT NOT NULL,
+                power TEXT NOT NULL,
+                dependencies TEXT NOT NULL,
+                wiring TEXT NOT NULL,
+                papers TEXT NOT NULL,
+                gantt TEXT NOT NULL,
+                code TEXT NOT NULL,
+                exports TEXT NOT NULL,
+                version INTEGER DEFAULT 1,
+                timestamp TEXT NOT NULL
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS packages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                intent TEXT NOT NULL,
+                readiness_score INTEGER NOT NULL,
+                risk_score INTEGER NOT NULL,
+                optimization_score INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS projects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                prompt TEXT NOT NULL,
+                bom TEXT NOT NULL,
+                power TEXT NOT NULL,
+                dependencies TEXT NOT NULL,
+                wiring TEXT NOT NULL,
+                papers TEXT NOT NULL,
+                gantt TEXT NOT NULL,
+                code TEXT NOT NULL,
+                exports TEXT NOT NULL,
+                version INTEGER DEFAULT 1,
+                timestamp TEXT NOT NULL
+            )
+        """)
     conn.commit()
     conn.close()
 
 def save_package(user_id: str, intent: str, readiness: int, risk: int, optimization: int, data: dict):
     conn = get_db_connection()
-    cursor = conn.cursor()
     timestamp = datetime.utcnow().isoformat()
     data_str = json.dumps(data)
     
-    cursor.execute("""
+    query = """
         INSERT INTO packages (user_id, intent, readiness_score, risk_score, optimization_score, data, timestamp)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (user_id, intent, readiness, risk, optimization, data_str, timestamp))
-    
+    """
+    execute_query(conn, query, (user_id, intent, readiness, risk, optimization, data_str, timestamp))
     conn.commit()
     conn.close()
 
 def get_user_history(user_id: str):
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
+    query = """
         SELECT id, intent, readiness_score, risk_score, optimization_score, data, timestamp 
         FROM packages 
         WHERE user_id = ? 
         ORDER BY timestamp DESC
-    """, (user_id,))
+    """
+    cursor = execute_query(conn, query, (user_id,))
     rows = cursor.fetchall()
     conn.close()
     

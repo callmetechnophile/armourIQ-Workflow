@@ -1,0 +1,14 @@
+{
+  "agent": "Research Agent",
+  "parent": "c85821a9-1831-454d-a77e-04985c77d0dc",
+  "tool": "search_papers",
+  "scope": [
+    "search_papers",
+    "summarize_papers"
+  ],
+  "timestamp": "1782803334.3055015",
+  "hash": "fea3a0e68b7cbd02d7e539914b6851c42e6d07bd316e3f6a855fc2060722090f",
+  "status": "success",
+  "execution_result": "[{'id': 'paper_generic_1', 'title': 'Technical Advancements in Automated Bionic robotic hand Engineering Structures', 'authors': 'Dr. E. Benson, P. Wright', 'source': 'OpenAlex', 'url': 'https://openalex.org/generic-paper-link-1', 'publish_year': 2023, 'citation_count': 3}, {'id': 'paper_generic_2',...",
+  "authority_chain": "Planner Agent -> Research Agent"
+}

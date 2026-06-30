@@ -19,6 +19,14 @@ from backend.services.electrical_service import check_voltage_compatibility
 from backend.services.pin_service import generate_pin_map
 from backend.services.bom_service import export_bom, generate_optimized_bom, calculate_landed_cost, find_alternative_components
 
+# Tier 2 Production Grade Services
+from backend.services.power_service import calculate_power_budget
+from backend.services.dependency_service import generate_dependency_graph
+from backend.services.wiring_service import generate_wiring_diagram
+from backend.services.paper_ranking_service import rank_papers
+from backend.services.datasheet_service import fetch_datasheet_links
+from backend.services.connection_chatbot_service import ask_connection_assistant
+
 # Global in-memory audit log list for quick tracking
 AUDIT_LOGS: List[Dict[str, Any]] = []
 
@@ -142,6 +150,18 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             result = generate_pin_map(args.get("components", []))
         elif tool_name == "export_bom":
             result = export_bom(args.get("components", []), args.get("cost_summary", {}))
+        elif tool_name == "calculate_power_budget":
+            result = calculate_power_budget(args.get("components", []))
+        elif tool_name == "generate_dependency_graph":
+            result = generate_dependency_graph(args.get("components", []))
+        elif tool_name == "generate_wiring_diagram":
+            result = generate_wiring_diagram(args.get("components", []))
+        elif tool_name == "rank_papers":
+            result = rank_papers(args.get("papers", []), args.get("query", ""))
+        elif tool_name == "fetch_datasheets":
+            result = [fetch_datasheet_links(c.get("component") or c.get("name", "")) for c in args.get("components", [])]
+        elif tool_name == "ask_connection_assistant":
+            result = ask_connection_assistant(args.get("message", ""), args.get("context", {}))
         elif tool_name == "generate_optimized_bom":
             result = generate_optimized_bom(args.get("components", []), args.get("mode", "normal"))
         elif tool_name == "calculate_landed_cost":

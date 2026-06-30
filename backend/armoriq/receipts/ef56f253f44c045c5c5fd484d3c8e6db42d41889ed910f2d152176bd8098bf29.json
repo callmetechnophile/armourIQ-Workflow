@@ -1,0 +1,14 @@
+{
+  "agent": "Research Agent",
+  "parent": "8726bddd-3d84-4419-bb16-86c85f246b00",
+  "tool": "export_pdf",
+  "scope": [
+    "search_papers",
+    "summarize_papers"
+  ],
+  "timestamp": "1782805671.1170657",
+  "hash": "ef56f253f44c045c5c5fd484d3c8e6db42d41889ed910f2d152176bd8098bf29",
+  "status": "blocked",
+  "execution_result": "Scope violation: Agent 'Research Agent' tried to execute 'export_pdf'. Allowed scope: ['search_papers', 'summarize_papers']. Tool 'export_pdf' is not in the delegated scope.",
+  "authority_chain": "Planner Agent -> Research Agent"
+}

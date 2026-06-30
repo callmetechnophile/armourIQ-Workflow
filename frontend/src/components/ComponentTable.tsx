@@ -15,7 +15,8 @@ interface ComponentTableProps {
 }
 
 export default function ComponentTable({ components }: ComponentTableProps) {
-  const totalCost = components.reduce((sum, item) => sum + item.cost, 0);
+  const conversionRate = 83;
+  const totalCost = components.reduce((sum, item) => sum + (item.cost * conversionRate), 0);
 
   if (!components || components.length === 0) {
     return (
@@ -35,7 +36,7 @@ export default function ComponentTable({ components }: ComponentTableProps) {
         </h3>
         <div className="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-md font-mono">
           <span>Est. Budget:</span>
-          <span className="text-emerald-400 font-bold font-mono text-sm">${totalCost.toFixed(2)}</span>
+          <span className="text-emerald-400 font-bold font-mono text-sm">₹{Math.round(totalCost).toLocaleString('en-IN')}</span>
         </div>
       </div>
 
@@ -54,7 +55,7 @@ export default function ComponentTable({ components }: ComponentTableProps) {
               <tr key={`comp-${idx}`} className="hover:bg-blue-500/5 transition-colors duration-150">
                 <td className="py-3 px-3 font-semibold text-cyan-400/90 whitespace-nowrap">{item.category}</td>
                 <td className="py-3 px-3 text-slate-200 font-medium">{item.name}</td>
-                <td className="py-3 px-3 text-right font-bold text-emerald-400 font-mono">${item.cost.toFixed(2)}</td>
+                <td className="py-3 px-3 text-right font-bold text-emerald-400 font-mono">₹{Math.round(item.cost * conversionRate).toLocaleString('en-IN')}</td>
                 <td className="py-3 px-3 text-slate-400 leading-relaxed max-w-xs">{item.notes}</td>
               </tr>
             ))}

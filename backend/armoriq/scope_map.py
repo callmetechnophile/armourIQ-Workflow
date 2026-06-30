@@ -15,5 +15,5 @@ AGENT_SCOPES: Dict[str, List[str]] = {
     "Validation Agent": ["validate_architecture"],
     "Optimization Agent": ["optimize_components"],
     "Planning Agent": ["generate_roadmap", "generate_gantt"],
-    "Export Agent": ["export_pdf", "export_csv", "export_markdown"]
+    "Export Agent": ["export_pdf", "export_csv", "export_markdown", "export_docx"]
 }

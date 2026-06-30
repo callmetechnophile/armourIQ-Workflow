@@ -1,0 +1,13 @@
+{
+  "agent": "Planner Agent",
+  "parent": "65a3ee0b-9f04-4c44-a059-f2984d8f619a",
+  "tool": "generate_dependency_graph",
+  "scope": [
+    "generate_dependency_graph"
+  ],
+  "timestamp": "1782808143.867136",
+  "hash": "08363f775042c60f766a4999ebb87e060ba7af8015fbb1686724a8365c04a44b",
+  "status": "success",
+  "execution_result": "{'nodes': [{'id': 'node_0', 'label': 'ESP32-WROOM-32D Development Board', 'type': 'controller', 'category': 'Core Controller'}, {'id': 'node_1', 'label': 'PCA9685 16-Ch PWM Servo Driver Board', 'type': 'driver', 'category': 'Servo Driver'}, {'id': 'node_2', 'label': 'SG90 9g Micro Servo Motors (5x S...",
+  "authority_chain": "Planner Agent"
+}

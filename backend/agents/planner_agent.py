@@ -276,7 +276,7 @@ def run_engineering_pipeline(user_intent: str) -> Dict[str, Any]:
     # 9. Invoke Export Agent to build PDF bundle
     export_receipt = delegate(
         agent_name="Export Agent",
-        requested_scope=["export_pdf", "export_csv", "export_markdown"],
+        requested_scope=["export_pdf", "export_csv", "export_markdown", "export_docx"],
         parent_receipt=root_receipt_dict
     )
     export_res = run_export(package_data, export_receipt.model_dump())

@@ -10,7 +10,7 @@ from backend.mcp.tools.paper_tools import search_papers, summarize_papers
 from backend.mcp.tools.validation_tools import validate_architecture
 from backend.mcp.tools.optimization_tools import optimize_components
 from backend.mcp.tools.roadmap_tools import generate_roadmap, generate_gantt
-from backend.mcp.tools.export_tools import export_pdf, export_csv, export_markdown
+from backend.mcp.tools.export_tools import export_pdf, export_csv, export_markdown, export_docx
 
 # Production Grade Services
 from backend.services.cost_service import calculate_total_cost
@@ -186,6 +186,8 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             result = export_csv(args.get("data", {}))
         elif tool_name == "export_markdown":
             result = export_markdown(args.get("data", {}))
+        elif tool_name == "export_docx":
+            result = export_docx(args.get("data", {}))
         else:
             raise ValueError(f"Unknown tool name: {tool_name}")
             

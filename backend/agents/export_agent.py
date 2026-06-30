@@ -24,8 +24,16 @@ def run_export(data: Dict[str, Any], receipt_dict: Dict[str, Any]) -> Dict[str, 
         receipt_dict=receipt_dict
     )
     
+    docx = invoke_tool(
+        agent_name="Export Agent",
+        tool_name="export_docx",
+        args={"data": data},
+        receipt_dict=receipt_dict
+    )
+    
     return {
         "pdf": pdf,
         "csv": csv,
-        "markdown": markdown_rep
+        "markdown": markdown_rep,
+        "docx": docx
     }

@@ -940,6 +940,14 @@ ${rawBackground.trim()}
                 <Download className="w-3.5 h-3.5" />
                 Export Markdown
               </a>
+              <a
+                href={`${apiBase}${pipelineData.exports?.docx?.url}`}
+                download
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-500/10"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export DOCX
+              </a>
             </div>
           </div>
 

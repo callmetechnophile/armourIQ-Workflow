@@ -62,101 +62,108 @@ export default function GanttRoadmap({ roadmap, gantt }: GanttRoadmapProps) {
         <div className="overflow-x-auto pb-2">
           <svg width={paddingLeft + timelineWidth + 50} height={chartHeight} className="text-xs">
             {/* Grid Header Days */}
-            {Array.from({ length: daysTotal + 1 }).map((_, d) => {
-              const x = paddingLeft + d * scale;
-              return (
-                <g key={`grid-day-${d}`}>
-                  <line 
-                    x1={x} 
-                    y1={25} 
-                    x2={x} 
-                    y2={chartHeight - 10} 
-                    stroke="rgba(59, 130, 246, 0.08)" 
-                    strokeWidth={1} 
-                  />
-                  {d % 2 === 0 && (
-                    <text x={x} y={15} fill="#64748b" textAnchor="middle" className="font-mono text-[9px]">
-                      D{d}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
+            {(() => {
+              const textInterval = daysTotal > 50 ? 10 : (daysTotal > 20 ? 5 : 2);
+              return Array.from({ length: daysTotal + 1 }).map((_, d) => {
+                const x = paddingLeft + d * scale;
+                return (
+                  <g key={`grid-day-${d}`}>
+                    <line 
+                      x1={x} 
+                      y1={25} 
+                      x2={x} 
+                      y2={chartHeight - 10} 
+                      stroke="rgba(59, 130, 246, 0.08)" 
+                      strokeWidth={1} 
+                    />
+                    {d % textInterval === 0 && (
+                      <text x={x} y={15} fill="#64748b" textAnchor="middle" className="font-mono text-[9px]">
+                        D{d}
+                      </text>
+                    )}
+                  </g>
+                );
+              });
+            })()}
 
             {/* Gantt Rows */}
-            {gantt.map((task, idx) => {
-              const y = 30 + idx * (taskHeight + gap);
-              const duration = Math.ceil(
-                (new Date(task.end).getTime() - new Date(task.start).getTime()) / (1000 * 3600 * 24)
-              ) || 5;
-              
-              // Calculate relative day index
-              let prevDays = 0;
-              for (let j = 0; j < idx; j++) {
-                prevDays += roadmap[j]?.duration_days || 0;
-              }
-              
-              const xStart = paddingLeft + prevDays * scale;
-              const barWidth = duration * scale;
+            {(() => {
+              const parseDate = (dStr: string) => {
+                const parts = dStr.split('-');
+                return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+              };
+              const projectStart = gantt[0] ? parseDate(gantt[0].start) : new Date();
 
-              return (
-                <g key={task.id} className="group">
-                  {/* Task Name Label */}
-                  <text 
-                    x={10} 
-                    y={y + taskHeight / 2 + 4} 
-                    fill="#e2e8f0" 
-                    className="font-semibold text-[11px] select-none"
-                  >
-                    {task.name.length > 25 ? `${task.name.substring(0, 22)}...` : task.name}
-                  </text>
-                  
-                  {/* Task bar container background */}
-                  <rect 
-                    x={xStart} 
-                    y={y} 
-                    width={barWidth} 
-                    height={taskHeight} 
-                    rx={4} 
-                    fill="rgba(59, 130, 246, 0.05)" 
-                    stroke="rgba(59, 130, 246, 0.15)"
-                  />
-                  
-                  {/* Task progress fill */}
-                  <rect 
-                    x={xStart} 
-                    y={y} 
-                    width={barWidth * (task.progress / 100 || 0.15)} 
-                    height={taskHeight} 
-                    rx={4} 
-                    fill="url(#gantt-gradient)" 
-                  />
-                  
-                  {/* Progress Text overlay on hover */}
-                  <text 
-                    x={xStart + barWidth / 2} 
-                    y={y + taskHeight / 2 + 4} 
-                    fill="#ffffff" 
-                    textAnchor="middle" 
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] font-bold"
-                  >
-                    {task.progress > 0 ? `${task.progress}% Complete` : 'Scheduled'}
-                  </text>
-                  
-                  {/* Connection line dependency arrow */}
-                  {task.dependencies && (
-                    <path
-                      d={`M ${xStart - 10} ${y - gap} L ${xStart - 10} ${y + taskHeight / 2} L ${xStart} ${y + taskHeight / 2}`}
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth={1.2}
-                      strokeDasharray="2 2"
-                      className="opacity-70"
+              return gantt.map((task, idx) => {
+                const y = 30 + idx * (taskHeight + gap);
+                const taskStart = parseDate(task.start);
+                const taskEnd = parseDate(task.end);
+                
+                const dayOffset = Math.round((taskStart.getTime() - projectStart.getTime()) / (1000 * 3600 * 24));
+                const duration = Math.round((taskEnd.getTime() - taskStart.getTime()) / (1000 * 3600 * 24)) || 1;
+                
+                const xStart = paddingLeft + dayOffset * scale;
+                const barWidth = duration * scale;
+
+                return (
+                  <g key={task.id} className="group">
+                    {/* Task Name Label */}
+                    <text 
+                      x={10} 
+                      y={y + taskHeight / 2 + 4} 
+                      fill="#e2e8f0" 
+                      className="font-semibold text-[11px] select-none"
+                    >
+                      {task.name.length > 25 ? `${task.name.substring(0, 22)}...` : task.name}
+                    </text>
+                    
+                    {/* Task bar container background */}
+                    <rect 
+                      x={xStart} 
+                      y={y} 
+                      width={barWidth} 
+                      height={taskHeight} 
+                      rx={4} 
+                      fill="rgba(59, 130, 246, 0.05)" 
+                      stroke="rgba(59, 130, 246, 0.15)"
                     />
-                  )}
-                </g>
-              );
-            })}
+                    
+                    {/* Task progress fill */}
+                    <rect 
+                      x={xStart} 
+                      y={y} 
+                      width={barWidth * (task.progress / 100 || 0.15)} 
+                      height={taskHeight} 
+                      rx={4} 
+                      fill="url(#gantt-gradient)" 
+                    />
+                    
+                    {/* Progress Text overlay on hover */}
+                    <text 
+                      x={xStart + barWidth / 2} 
+                      y={y + taskHeight / 2 + 4} 
+                      fill="#ffffff" 
+                      textAnchor="middle" 
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] font-bold"
+                    >
+                      {task.progress > 0 ? `${task.progress}% Complete` : 'Scheduled'}
+                    </text>
+                    
+                    {/* Connection line dependency arrow */}
+                    {task.dependencies && (
+                      <path
+                        d={`M ${xStart - 10} ${y - gap} L ${xStart - 10} ${y + taskHeight / 2} L ${xStart} ${y + taskHeight / 2}`}
+                        fill="none"
+                        stroke="#f59e0b"
+                        strokeWidth={1.2}
+                        strokeDasharray="2 2"
+                        className="opacity-70"
+                      />
+                    )}
+                  </g>
+                );
+              });
+            })()}
             
             {/* Defs for gradients */}
             <defs>

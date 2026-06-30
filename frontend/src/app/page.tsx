@@ -62,6 +62,11 @@ export default function Home() {
   const [activeDashboardTab, setActiveDashboardTab] = useState('delegation');
   const [receiptRefreshTrigger, setReceiptRefreshTrigger] = useState(0);
 
+  const isTestingEnv = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname === '127.0.0.1' || 
+     process.env.NODE_ENV === 'development');
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const count = parseInt(localStorage.getItem('armourflow_guest_usage') || '0', 10);
@@ -382,7 +387,7 @@ ${rawBackground.trim()}
     }
     
     // Check guest usage limit
-    if (!userId && usageCount >= 2) {
+    if (!isTestingEnv && !userId && usageCount >= 2) {
       return;
     }
     
@@ -916,7 +921,7 @@ ${rawBackground.trim()}
 
 
       {/* Blocker Overlay for Guests exceeding limit */}
-      {!userId && usageCount >= 2 && (
+      {!isTestingEnv && !userId && usageCount >= 2 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-xl px-4 animate-fade-in">
           <div className="glass-panel p-8 max-w-md w-full border border-blue-500/30 bg-zinc-950/90 text-center shadow-2xl space-y-6">
             <img 

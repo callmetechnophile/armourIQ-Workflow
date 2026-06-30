@@ -1,6 +1,55 @@
+import os
+import json
 from typing import List, Dict, Any
 
 def extract_components(raw_text: str) -> List[Dict[str, Any]]:
+    # Check if GROQ_API_KEY is present to perform dynamic LLM-based component extraction
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    if groq_api_key and not groq_api_key.startswith("gsk_placeholder"):
+        try:
+            import httpx
+            prompt = (
+                "You are an expert hardware prototyping and design engineer.\n"
+                f"Analyze the user's design target: '{raw_text}'\n"
+                "Extract or generate a list of 4 to 6 required electronics and mechanical components to build this prototype.\n"
+                "For each component, estimate its market price in USD (keep it realistic, e.g., $5 to $200 depending on the component).\n\n"
+                "Output ONLY a valid JSON list. Do not include markdown wraps (like ```json) or any text outside of the JSON block.\n"
+                "Each component item in the list MUST have exactly these fields:\n"
+                "- category: string (e.g., 'Core Controller', 'Power Supply', 'Sensors', 'Actuators', 'Structural')\n"
+                "- name: string (the specific hardware part name, e.g., 'ESP32 Development Board')\n"
+                "- cost: float (the estimated cost in USD, e.g., 7.50)\n"
+                "- notes: string (a short explanation of its purpose in the prototype)\n"
+                "Example format: [{\"category\": \"Sensors\", \"name\": \"HC-SR04 Ultrasonic Sensor\", \"cost\": 3.50, \"notes\": \"Measures distance to target objects.\"}]"
+            )
+            
+            payload = {
+                "model": "gemma2-9b-it",
+                "messages": [
+                    {"role": "system", "content": "You are a precise JSON generator. Output only JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.2,
+                "response_format": {"type": "json_object"}
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {groq_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            with httpx.Client(timeout=10.0) as client:
+                res = client.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+                if res.status_code == 200:
+                    content = res.json()["choices"][0]["message"]["content"].strip()
+                    parsed = json.loads(content)
+                    if isinstance(parsed, list):
+                        return parsed
+                    elif isinstance(parsed, dict) and "components" in parsed:
+                        return parsed["components"]
+        except Exception as e:
+            print(f"[Extraction] Dynamic LLM extraction failed: {e}. Falling back to static mapping.")
+
+    # Static fallback maps
     text_lower = raw_text.lower()
     if "solar" in text_lower or "vacuum" in text_lower:
         return [
@@ -132,7 +181,7 @@ def extract_components(raw_text: str) -> List[Dict[str, Any]]:
             }
         ]
     else:
-        # Generic engineering BOM
+        # Generic engineering BOM fallback
         return [
             {
                 "category": "Core Controller",

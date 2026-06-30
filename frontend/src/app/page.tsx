@@ -222,7 +222,7 @@ export default function Home() {
   const handleGeneratePPT = () => {
     if (!pipelineData) return;
     
-    const projectName = "ARMOURFLOW AI";
+    const projectName = (pipelineData.intent || intent || "ARMOURFLOW AI").toUpperCase();
     const coreVibe = "Cyberpunk dark-mode blueprint tech console, glowing cyan and electric blue accents, neon red alerts";
     const targetAudience = "Investors, Product Managers, Engineers, Security Auditors";
     

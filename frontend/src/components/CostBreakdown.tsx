@@ -48,10 +48,20 @@ export default function CostBreakdown({ components, costSummary }: CostBreakdown
   };
 
   // Helper to categorize components
-  const getCategoryGroup = (category: string) => {
+  const getCategoryGroup = (category: string, name: string = "") => {
     const cat = (category || "").toLowerCase();
-    if (anyMatch(cat, ["power", "energy", "solar", "battery", "esc", "charger", "supply"])) return "Power";
-    if (anyMatch(cat, ["electronics", "navigation", "sensor", "controller", "board", "flight", "gps", "receiver"])) return "Electronics";
+    const nm = (name || "").toLowerCase();
+    
+    if (anyMatch(cat, ["power", "energy", "solar", "battery", "esc", "charger", "supply", "voltage"]) ||
+        anyMatch(nm, ["battery", "solar", "power supply", "charger", "esc"])) {
+      return "Power";
+    }
+    
+    if (anyMatch(cat, ["electronics", "navigation", "sensor", "controller", "board", "flight", "gps", "receiver", "mcu", "cpu", "processor", "led", "display", "screen", "wire", "module", "communication", "actuator", "indicator"]) ||
+        anyMatch(nm, ["esp32", "arduino", "pico", "sensor", "led", "wire", "gps", "display", "screen", "transceiver", "mcu", "controller"])) {
+      return "Electronics";
+    }
+    
     return "Mechanical";
   };
 
@@ -67,7 +77,7 @@ export default function CostBreakdown({ components, costSummary }: CostBreakdown
   };
 
   components.forEach((comp) => {
-    const catGroup = getCategoryGroup(comp.category);
+    const catGroup = getCategoryGroup(comp.category, comp.name);
     const activeCost = selectedCosts[comp.name] ?? (comp.cost * conversionRate);
     subtotals[catGroup] += Math.round(activeCost);
   });

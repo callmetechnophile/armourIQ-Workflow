@@ -19,9 +19,10 @@ def calculate_total_cost(components: List[Dict[str, Any]]) -> Dict[str, Any]:
         
         # Classify category
         cat = comp.get("category", "").lower()
-        if any(keyword in cat for keyword in ["power", "energy", "solar", "battery", "esc", "charger", "supply"]):
+        nm = comp.get("name", "").lower()
+        if any(k in cat for k in ["power", "energy", "solar", "battery", "esc", "charger", "supply", "voltage"]) or any(k in nm for k in ["battery", "solar", "power supply", "charger", "esc"]):
             category_group = "Power"
-        elif any(keyword in cat for keyword in ["electronics", "navigation", "sensor", "controller", "board", "flight", "gps", "receiver"]):
+        elif any(k in cat for k in ["electronics", "navigation", "sensor", "controller", "board", "flight", "gps", "receiver", "mcu", "cpu", "processor", "led", "display", "screen", "wire", "module", "communication", "actuator", "indicator"]) or any(k in nm for k in ["esp32", "arduino", "pico", "sensor", "led", "wire", "gps", "display", "screen", "transceiver", "mcu", "controller"]):
             category_group = "Electronics"
         else:
             category_group = "Mechanical"

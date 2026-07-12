@@ -1,0 +1,13 @@
+{
+  "agent": "Research Agent",
+  "parent": "b90579ee-168f-4736-8de1-459021686e1e",
+  "tool": "graph.insert",
+  "scope": [
+    "search_papers"
+  ],
+  "timestamp": "1783862470.580878",
+  "hash": "d448e115fe0610b3e3ab2b885c42aea3a1257d2248dfb05cf4f6f3dcf01e3544",
+  "status": "blocked",
+  "execution_result": "Scope violation: Agent 'Research Agent' tried to execute 'graph.insert'. Allowed scope: ['search_papers']. Tool 'graph.insert' is not in the delegated scope.",
+  "authority_chain": "Planner Agent -> Research Agent"
+}

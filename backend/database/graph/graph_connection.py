@@ -1,5 +1,7 @@
 import os
 import logging
+from dotenv import load_dotenv
+load_dotenv()
 
 logger = logging.getLogger("GraphConnection")
 
@@ -52,12 +54,12 @@ class MockDriver:
         pass
 
 def get_graph_driver():
-    uri = os.environ.get("AURA_URI")
-    username = os.environ.get("AURA_USERNAME")
-    password = os.environ.get("AURA_PASSWORD")
+    uri = os.environ.get("AURA_URI") or os.environ.get("NEO4J_URI")
+    username = os.environ.get("AURA_USERNAME") or os.environ.get("NEO4J_USERNAME")
+    password = os.environ.get("AURA_PASSWORD") or os.environ.get("NEO4J_PASSWORD")
     
     if not uri or not username or not password:
-        logger.warning("[GraphConnection] AURA_URI, AURA_USERNAME, or AURA_PASSWORD is not set. Falling back to MockDriver.")
+        logger.warning("[GraphConnection] AuraDB credentials (AURA_URI or NEO4J_URI) not fully set. Falling back to MockDriver.")
         return MockDriver()
         
     try:

@@ -1,0 +1,13 @@
+{
+  "agent": "KnowledgeGraphAgent",
+  "parent": "91a0e020-e243-4c3f-af1a-2ded2e510be7",
+  "tool": "graph.read",
+  "scope": [
+    "graph.read"
+  ],
+  "timestamp": "1783862470.5794916",
+  "hash": "707bcba7ac2c8411eca8745cc605837e65d8bee8946fe6a69847c6f933b28a92",
+  "status": "success",
+  "execution_result": "[]",
+  "authority_chain": "Planner Agent -> KnowledgeGraphAgent"
+}

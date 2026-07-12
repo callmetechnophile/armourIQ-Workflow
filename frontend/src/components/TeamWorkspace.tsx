@@ -322,22 +322,73 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
           </div>
         </div>
 
-        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-          {activities.map((a) => (
-            <div key={a.id} className="flex gap-2.5 items-start p-3 bg-zinc-900/30 border border-zinc-850 rounded-lg">
-              <div className="p-1.5 bg-emerald-950/30 border border-emerald-800/40 rounded mt-0.5 text-emerald-400">
-                <Shield className="w-3.5 h-3.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-mono text-slate-300">
-                  <span className="font-extrabold text-slate-400">{a.user_id}</span> {a.details}
+        {/* Participants & Emails List */}
+        <div className="bg-zinc-900/20 border border-zinc-850 rounded-lg p-4 space-y-3 font-mono">
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+              Team Participants ({members.length})
+            </span>
+            <span className="text-[9px] text-slate-500 font-extrabold uppercase">
+              Roster
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {members.map((member, idx) => {
+              // Owner/Creator has the role "Owner" or "Creator" or is first in the list
+              const isCreator = member.role.toLowerCase() === 'creator' || 
+                                member.role.toLowerCase() === 'owner' || 
+                                idx === 0;
+              
+              return (
+                <div 
+                  key={member.id} 
+                  className="bg-zinc-950/40 border border-zinc-900 rounded p-3 flex items-start justify-between gap-2"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <div className="text-xs font-bold text-slate-200 flex items-center gap-1 truncate">
+                      <span>{member.user_id}</span>
+                      {isCreator && (
+                        <span title="Team Creator" className="text-amber-400 select-none shrink-0">👑</span>
+                      )}
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate">{member.email}</div>
+                  </div>
+                  <span className={`text-[8px] border px-2 py-0.5 rounded font-bold uppercase shrink-0 ${
+                    isCreator
+                      ? 'bg-amber-950/20 border-amber-900/30 text-amber-400'
+                      : 'bg-slate-900 border-slate-800 text-slate-400'
+                  }`}>
+                    {member.role}
+                  </span>
                 </div>
-                <div className="text-[8px] font-mono text-slate-500 mt-1">
-                  {new Date(a.timestamp).toLocaleTimeString()}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Activity Logs Feed */}
+        <div className="space-y-3">
+          <span className="text-[10px] text-slate-500 font-mono tracking-widest uppercase block border-b border-zinc-900 pb-2">
+            Immutable Activity logs
+          </span>
+          <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1">
+            {activities.map((a) => (
+              <div key={a.id} className="flex gap-2.5 items-start p-3 bg-zinc-900/30 border border-zinc-850 rounded-lg">
+                <div className="p-1.5 bg-emerald-950/30 border border-emerald-800/40 rounded mt-0.5 text-emerald-400">
+                  <Shield className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-mono text-slate-300">
+                    <span className="font-extrabold text-slate-400">{a.user_id}</span> {a.details}
+                  </div>
+                  <div className="text-[8px] font-mono text-slate-500 mt-1">
+                    {new Date(a.timestamp).toLocaleTimeString()}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

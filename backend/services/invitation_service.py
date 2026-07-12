@@ -381,6 +381,15 @@ WorkflowGuide AI"""
         import logging
         logging.getLogger("GraphLoader").warning(f"Could not store team details in AuraDB EKG: {e}")
         
+    # Log email template to terminal stdout for local debug/viewing
+    print("\n" + "="*60)
+    print("MOCK EMAIL SENT TO COLLABORATOR:")
+    print(f"To: {email}")
+    print(f"Subject: {invite['email_subject']}")
+    print("-" * 60)
+    print(invite['email_body'])
+    print("="*60 + "\n")
+
     return {
         "team_id": team_id,
         "team_id_numeric": team_id_numeric,

@@ -10,6 +10,7 @@ from backend.agents.validation_agent import run_validation
 from backend.agents.optimization_agent import run_optimization
 from backend.agents.planning_agent import run_planning
 from backend.agents.export_agent import run_export
+from backend.agents.knowledge_graph_agent import run_knowledge_graph_agent
 from backend.services.collaboration_service import create_team, get_team_members, get_project_comments, fetch_activity_logs
 
 def run_engineering_pipeline(user_intent: str, target_days: int = 22) -> Dict[str, Any]:
@@ -19,6 +20,14 @@ def run_engineering_pipeline(user_intent: str, target_days: int = 22) -> Dict[st
     # 1. Capture Root Plan
     root_receipt = capture_plan(user_intent)
     root_receipt_dict = root_receipt.model_dump()
+    
+    # 1b. Run Knowledge Graph Agent to query engineering relationships
+    graph_receipt = delegate(
+        agent_name="KnowledgeGraphAgent",
+        requested_scope=["graph.read"],
+        parent_receipt=root_receipt_dict
+    )
+    graph_context = run_knowledge_graph_agent(user_intent, graph_receipt.model_dump())
     
     # 2. RUN MANDATORY ARMORIQ BLOCKING TEST
     # Delegate Research Agent with ONLY paper search scopes
@@ -378,6 +387,14 @@ def run_engineering_pipeline(user_intent: str, target_days: int = 22) -> Dict[st
     
     # 10. Generate Decision Trace Table data
     decision_trace = generate_decision_trace(user_intent)
+    
+    # Automatically Ingest generated project graph into AuraDB
+    try:
+        from backend.database.graph.graph_service import GraphService
+        GraphService().ingest_project(project_id, package_data)
+    except Exception as e:
+        import logging
+        logging.getLogger("PlannerAgent").warning(f"Failed to ingest project graph to AuraDB: {e}")
     
     # 11. Compile final output payload
     return {

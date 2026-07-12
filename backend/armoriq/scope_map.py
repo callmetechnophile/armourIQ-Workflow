@@ -19,5 +19,6 @@ AGENT_SCOPES: Dict[str, List[str]] = {
     "CollaborationAgent": ["invite_member", "assign_role", "comment"],
     "VersionAgent": ["save_version", "rollback_version", "fork_project"],
     "ThermalAgent": ["analyze_thermal_risk"],
-    "ContradictionAgent": ["detect_contradictions"]
+    "ContradictionAgent": ["detect_contradictions"],
+    "KnowledgeGraphAgent": ["graph.read", "graph.insert", "graph.update"]
 }

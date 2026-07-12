@@ -8,6 +8,7 @@ from backend.routes.packages import router as packages_router
 from backend.routes.workspace import router as workspace_router
 from backend.routes.collaboration import router as collaboration_router
 from backend.routes.versioning import router as versioning_router
+from backend.routes.graph import router as graph_router
 from backend.database import init_db
 
 # Initialize User Storage SQLite Database
@@ -34,6 +35,7 @@ app.include_router(packages_router)
 app.include_router(workspace_router)
 app.include_router(collaboration_router)
 app.include_router(versioning_router)
+app.include_router(graph_router)
 
 EXPORT_DIR = os.path.join(os.path.dirname(__file__), "exports")
 

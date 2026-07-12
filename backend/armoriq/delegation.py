@@ -32,6 +32,7 @@ from backend.services.contradiction_service import detect_contradictions
 from backend.services.paper_ranking_service import rank_papers
 from backend.services.datasheet_service import fetch_datasheet_links
 from backend.services.connection_chatbot_service import ask_connection_assistant
+from backend.database.graph.graph_service import GraphService
 
 # Global in-memory audit log list for quick tracking
 AUDIT_LOGS: List[Dict[str, Any]] = []
@@ -210,6 +211,10 @@ def invoke_tool(agent_name: str, tool_name: str, args: Dict[str, Any], receipt_d
             result = analyze_thermal_risk(args.get("components", []), args.get("enclosure_temp", 25.0))
         elif tool_name == "detect_contradictions":
             result = detect_contradictions(args.get("papers", []))
+        elif tool_name == "graph.read":
+            result = GraphService().run_read_query(args.get("query_name"), args.get("params", {}))
+        elif tool_name in ("graph.insert", "graph.update"):
+            result = GraphService().run_write_query(args.get("query_name"), args.get("params", {}))
         else:
             raise ValueError(f"Unknown tool name: {tool_name}")
             

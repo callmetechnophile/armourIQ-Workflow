@@ -175,6 +175,48 @@ export default function Home() {
   }, [isLightMode]);
 
   useEffect(() => {
+    if (pipelineData && pipelineData.roadmap && pipelineData.gantt) {
+      const originalDays = [5, 7, 6, 4];
+      const scale = targetDays / 22;
+      
+      const scaledDays: number[] = [];
+      for (let i = 0; i < originalDays.length - 1; i++) {
+        scaledDays.push(Math.max(1, Math.round(originalDays[i] * scale)));
+      }
+      const lastVal = targetDays - scaledDays.reduce((sum, d) => sum + d, 0);
+      scaledDays.push(Math.max(1, lastVal));
+
+      const updatedRoadmap = pipelineData.roadmap.map((phase: any, index: number) => ({
+        ...phase,
+        duration_days: scaledDays[index] || 1
+      }));
+
+      let currentDate = new Date();
+      const updatedGantt = pipelineData.gantt.map((task: any, index: number) => {
+        const duration = scaledDays[index] || 1;
+        const start = currentDate.toISOString().split('T')[0];
+        currentDate.setDate(currentDate.getDate() + duration);
+        const end = currentDate.toISOString().split('T')[0];
+        return {
+          ...task,
+          start,
+          end
+        };
+      });
+
+      const currentRoadmapDurations = pipelineData.roadmap.map((p: any) => p.duration_days).join(',');
+      const newRoadmapDurations = scaledDays.join(',');
+      if (currentRoadmapDurations !== newRoadmapDurations) {
+        setPipelineData((prev: any) => ({
+          ...prev,
+          roadmap: updatedRoadmap,
+          gantt: updatedGantt
+        }));
+      }
+    }
+  }, [targetDays, pipelineData]);
+
+  useEffect(() => {
     async function fetchHistory() {
       if (!userId || !apiBase) return;
       try {

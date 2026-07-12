@@ -29,3 +29,12 @@ class ResearchResponse(BaseModel):
     voltage_risks: Optional[List[Dict[str, Any]]] = None
     pin_mapping: Optional[List[Dict[str, Any]]] = None
     bom_exports: Optional[Dict[str, Any]] = None
+    datasheets: Optional[List[Dict[str, Any]]] = None
+    power_analysis: Optional[Dict[str, Any]] = None
+    dependency_graph: Optional[Dict[str, Any]] = None
+    wiring_diagram: Optional[Dict[str, Any]] = None
+    contradictions: Optional[List[Dict[str, Any]]] = None
+    thermal_analysis: Optional[List[Dict[str, Any]]] = None
+    team_workspace: Optional[Dict[str, Any]] = None
+    version_history: Optional[Dict[str, Any]] = None
+

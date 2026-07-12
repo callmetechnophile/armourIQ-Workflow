@@ -177,7 +177,7 @@ export default function WorkspaceDashboard({
               Save Workspace Bundle
             </h3>
             <p className="text-[10px] text-slate-400 leading-relaxed">
-              Saves the full pipeline — BOM, power, schematics, papers, Gantt, code, audit trail — as a single gzip-compressed bundle in PostgreSQL.
+              Saves the full pipeline — BOM, power, schematics, papers, Gantt, code, audit trail — as a single gzip-compressed bundle in SQLite.
             </p>
 
             <div className="space-y-2">
@@ -226,7 +226,7 @@ export default function WorkspaceDashboard({
             >
               {isSaving
                 ? <><Loader className="w-3.5 h-3.5 animate-spin" /> Compressing & Saving…</>
-                : <><Database className="w-3.5 h-3.5" /> Save to PostgreSQL</>}
+                : <><Database className="w-3.5 h-3.5" /> Save the Idea</>}
             </button>
           </div>
 

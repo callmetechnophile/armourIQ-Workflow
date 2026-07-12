@@ -57,12 +57,20 @@ export default function GraphExplorer({ projectName, apiBase }: GraphExplorerPro
         if (!res.ok) throw new Error("AuraDB connection error. Verify database status.");
         const data = await res.json();
         
-        // Map nodes into positions
+        // Map nodes into positions — normalise both flat and React-Flow-nested shapes
         const initializedNodes = (data.nodes || []).map((node: any, idx: number) => {
           const col = idx % 4;
-          const row = idx // 4;
+          const row = Math.floor(idx / 4); // ← was `idx // 4` (JS comment, always 0!)
+          // Backend may return ReactFlow shape: { id, data: { label, type, properties } }
+          // or flat shape: { id, label, type, properties }
+          const label      = node.label      ?? node.data?.label      ?? node.id;
+          const type       = node.type       ?? node.data?.type       ?? "Component";
+          const properties = node.properties ?? node.data?.properties ?? {};
           return {
-            ...node,
+            id: node.id,
+            label,
+            type,
+            properties,
             x: 80 + col * 200 + (Math.random() - 0.5) * 40,
             y: 85 + row * 110 + (Math.random() - 0.5) * 30,
             vx: 0,
@@ -70,11 +78,11 @@ export default function GraphExplorer({ projectName, apiBase }: GraphExplorerPro
           };
         });
 
-        // Resolve edge mappings into nodes ids
+        // Resolve edge mappings — handle both flat and ReactFlow edge shapes
         const formattedEdges = (data.edges || []).map((e: any) => ({
           source: e.source,
           target: e.target,
-          type: e.label || e.type
+          type: e.label || e.type || e.data?.label || "CONNECTED_TO"
         }));
 
         setNodes(initializedNodes);

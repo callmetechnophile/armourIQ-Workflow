@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from backend.graph.graph_service import GraphService
+from backend.graph.synthetic_graph import build_synthetic_graph
+from backend.graph.graph_visualizer import format_for_react_flow
 from backend.armoriq.delegation import capture_plan, delegate, invoke_tool
 
 router = APIRouter(prefix="/api/graph/explorer", tags=["GraphExplorer"])
@@ -21,9 +23,16 @@ def get_project_ekg(project_id: str):
             receipt_dict=graph_receipt.model_dump()
         )
         
-        # Load and return graph
+        # Try AuraDB first
         service = GraphService()
-        return service.get_project_graph(project_id)
+        result = service.get_project_graph(project_id)
+
+        # If AuraDB returned nothing (MockDriver fallback), use synthetic graph
+        if not result.get("nodes"):
+            raw = build_synthetic_graph(project_id)
+            result = format_for_react_flow(raw)
+
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch project EKG: {str(e)}")
 

@@ -8,21 +8,11 @@ from datetime import datetime
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db_connection():
-    if DATABASE_URL and (DATABASE_URL.startswith("postgres://") or DATABASE_URL.startswith("postgresql://")):
-        try:
-            import psycopg2
-            url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-            conn = psycopg2.connect(url)
-            # Set cursor factory attribute helper
-            conn.cursor_factory = True
-            return conn
-        except Exception as e:
-            print(f"[DB] PostgreSQL connection failed: {e}. Falling back to SQLite.")
-            
     DB_PATH = os.path.join(os.path.dirname(__file__), "..", "user_storage.db")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def get_cursor(conn):
     if hasattr(conn, "cursor_factory"):

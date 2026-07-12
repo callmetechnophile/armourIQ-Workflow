@@ -1,14 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from backend.auth import get_current_user
 from backend.services.workspace_service import (
     save_project, load_project, list_user_projects, 
     clone_project, delete_project, get_project_versions
 )
+from backend.services.bundle_service import (
+    save_bundle, load_bundle, list_bundles, delete_bundle
+)
 from backend.services.connection_chatbot_service import ask_connection_assistant
 
 router = APIRouter(prefix="/api/workspace", tags=["Workspace"])
+
 
 class ProjectSaveSchema(BaseModel):
     name: str
@@ -94,3 +98,59 @@ async def chat_with_assistant(payload: ChatMessageSchema, user_id: str = Depends
         return {"reply": reply}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Bundle endpoints ───────────────────────────────────────────────────────────
+
+class BundleSaveSchema(BaseModel):
+    name: str
+    description: Optional[str] = ""
+    pipeline_data: Dict[str, Any]  # complete pipelineData object from frontend
+
+
+@router.post("/save-bundle")
+async def save_workspace_bundle(payload: BundleSaveSchema, user_id: str = Depends(get_current_user)):
+    """
+    Save the entire pipeline output as a single compressed bundle in PostgreSQL.
+    Automatically increments version if a bundle with the same name already exists.
+    """
+    try:
+        result = save_bundle(
+            user_id=user_id,
+            name=payload.name,
+            pipeline_data=payload.pipeline_data,
+            description=payload.description or ""
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Bundle save failed: {str(e)}")
+
+
+@router.get("/bundles")
+async def get_bundles_list(user_id: str = Depends(get_current_user)):
+    """List all saved bundles for the authenticated user."""
+    try:
+        return list_bundles(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/bundle/{bundle_id}")
+async def get_bundle(bundle_id: int, user_id: str = Depends(get_current_user)):
+    """Load and decompress a specific bundle by ID."""
+    try:
+        return load_bundle(user_id, bundle_id)
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/bundle/{bundle_id}")
+async def remove_bundle(bundle_id: int, user_id: str = Depends(get_current_user)):
+    """Delete a specific workspace bundle."""
+    try:
+        return delete_bundle(user_id, bundle_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

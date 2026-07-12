@@ -994,6 +994,7 @@ ${rawBackground.trim()}
                 <WorkspaceDashboard 
                   activeProjectName={pipelineData.intent || ""}
                   currentData={pipelineData}
+                  apiBase={apiBase}
                   onLoadProject={(data) => {
                     setPipelineData(data);
                     setIntent(data.name || data.intent);

@@ -85,7 +85,7 @@ export default function Home() {
   const [pptModalOpen, setPptModalOpen] = useState(false);
   const [pptPrompt, setPptPrompt] = useState('');
   const [activeDashboardTab, setActiveDashboardTab] = useState('bom');
-  const [targetDays, setTargetDays] = useState(22);
+  const [targetDays, setTargetDays] = useState(0);
   const [receiptRefreshTrigger, setReceiptRefreshTrigger] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -178,7 +178,7 @@ export default function Home() {
   }, [isLightMode]);
 
   useEffect(() => {
-    if (pipelineData && pipelineData.roadmap && pipelineData.gantt) {
+    if (targetDays > 0 && pipelineData && pipelineData.roadmap && pipelineData.gantt) {
       const originalDays = [5, 7, 6, 4];
       const scale = targetDays / 22;
       
@@ -501,6 +501,11 @@ ${rawBackground.trim()}
     }
     
     if (!searchIntent.trim() || searchIntent === "Listening...") return;
+
+    if (!targetDays || targetDays <= 0) {
+      setError("Please specify a target timeline (greater than 0 days) before proceeding.");
+      return;
+    }
     
     setError(null);
     setPipelineData(null);
@@ -707,14 +712,17 @@ ${rawBackground.trim()}
             </div>
           </div>
 
-          {/* Target Duration Input */}
           <div className="flex items-center gap-3 text-xs font-mono mb-8 bg-zinc-950/40 border border-zinc-850/60 p-2.5 px-5 rounded-full max-w-sm select-none">
             <span className="text-slate-400">Target Timeline:</span>
             <input 
               type="number" 
               value={targetDays} 
-              onChange={(e) => setTargetDays(Math.max(4, parseInt(e.target.value) || 4))}
-              className="w-16 bg-zinc-900 border border-zinc-800 rounded px-2.5 py-1 text-center font-bold text-cyan-400 focus:outline-none focus:border-cyan-500" 
+              onChange={(e) => setTargetDays(Math.max(0, parseInt(e.target.value) || 0))}
+              className={`w-16 bg-zinc-900 border rounded px-2.5 py-1 text-center font-bold focus:outline-none transition-all ${
+                targetDays === 0
+                  ? "border-red-500/50 text-red-400 animate-pulse"
+                  : "border-zinc-800 text-cyan-400 focus:border-cyan-500"
+              }`} 
             />
             <span className="text-slate-500">Days</span>
           </div>
@@ -884,8 +892,10 @@ ${rawBackground.trim()}
                 <input 
                   type="number" 
                   value={targetDays} 
-                  onChange={(e) => setTargetDays(Math.max(4, parseInt(e.target.value) || 4))}
-                  className="w-10 bg-transparent border-0 text-center font-bold text-cyan-400 focus:outline-none" 
+                  onChange={(e) => setTargetDays(Math.max(0, parseInt(e.target.value) || 0))}
+                  className={`w-10 bg-transparent border-0 text-center font-bold focus:outline-none transition-all ${
+                    targetDays === 0 ? "text-red-400 animate-pulse" : "text-cyan-400"
+                  }`} 
                 />
               </div>
               <button

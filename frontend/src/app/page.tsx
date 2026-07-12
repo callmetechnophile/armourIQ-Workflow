@@ -1,7 +1,7 @@
 'use client';
 // Vercel deployment rebuild trigger
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SignInButton, SignUpButton, Show, UserButton, useAuth } from '@clerk/nextjs';
 import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon, Sun, Presentation, X, Zap, Share2, Wifi, BarChart2, FlaskConical, Thermometer, ShoppingCart, Network, Users, History, MessageCircle, FolderOpen, Shield, Receipt, XCircle } from 'lucide-react';
 
@@ -87,6 +87,9 @@ export default function Home() {
   const [activeDashboardTab, setActiveDashboardTab] = useState('bom');
   const [targetDays, setTargetDays] = useState(22);
   const [receiptRefreshTrigger, setReceiptRefreshTrigger] = useState(0);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const isTestingEnv = typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || 
@@ -421,36 +424,74 @@ ${rawBackground.trim()}
     return () => clearInterval(interval);
   }, [isRecording]);
 
-  const handleVoiceInput = () => {
+  const handleVoiceInput = async () => {
     if (isRecording) {
-      if (recognition) {
-        recognition.stop();
+      // Stop recording
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
       }
       setIsRecording(false);
     } else {
-      setIsRecording(true);
-      setIntent("Listening...");
-      if (recognition) {
-        try {
-          recognition.start();
-        } catch (e) {
-          console.error(e);
-        }
-      } else {
-        // Fallback for simulated input if SpeechRecognition is blocked or unsupported
-        setTimeout(() => {
-          if (isRecording) {
-            setIntent("I want to build a solar powered vacuum cleaner");
-            setIsRecording(false);
+      // Start recording
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        chunksRef.current = [];
+        
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            chunksRef.current.push(e.data);
           }
+        };
+        
+        recorder.onstop = async () => {
+          const audioBlob = new Blob(chunksRef.current, { type: 'audio/wav' });
+          const formData = new FormData();
+          formData.append('file', audioBlob, 'audio.wav');
+          
+          try {
+            setIntent("Transcribing voice input...");
+            const res = await fetch(`${apiBase || 'http://localhost:8000'}/api/speech/stt`, {
+              method: 'POST',
+              body: formData
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setIntent(data.text || "");
+            } else {
+              setIntent("Error in transcription.");
+            }
+          } catch (err) {
+            console.error("Transcription upload failed:", err);
+            setIntent("Transcription failed.");
+          }
+          
+          // Stop stream tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorderRef.current = recorder;
+        recorder.start();
+        setIsRecording(true);
+        setIntent("Listening (Click Mic to Stop)...");
+      } catch (err) {
+        console.error("Failed to start recording:", err);
+        // Sandbox fallback if mic is blocked/unsupported
+        setIsRecording(true);
+        setIntent("Listening...");
+        setTimeout(() => {
+          setIntent("I want to build a solar powered vacuum cleaner");
+          setIsRecording(false);
         }, 3000);
       }
     }
   };
 
   const handleSearchSubmit = async (searchIntent = intent) => {
-    if (isRecording && recognition) {
-      recognition.stop();
+    if (isRecording) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
       setIsRecording(false);
     }
     

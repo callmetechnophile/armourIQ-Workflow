@@ -4,7 +4,7 @@ from typing import Dict, List
 AGENT_SCOPES: Dict[str, List[str]] = {
     "Planner Agent": ["delegate", "generate_dependency_graph", "ask_connection_assistant"],
     "Retrieval Agent": ["search_projects", "fetch_sources"],
-    "Extraction Agent": ["extract_components", "fetch_datasheets"],
+    "Extraction Agent": ["extract_components", "fetch_datasheets", "extraction.media"],
     "Cost Engine": ["calculate_total_cost"],
     "Alternative Finder": ["find_alternatives"],
     "Voltage Checker": ["check_voltage_compatibility", "calculate_power_budget"],
@@ -15,7 +15,7 @@ AGENT_SCOPES: Dict[str, List[str]] = {
     "Validation Agent": ["validate_architecture"],
     "Optimization Agent": ["optimize_components"],
     "Planning Agent": ["generate_roadmap", "generate_gantt"],
-    "Export Agent": ["export_pdf", "export_csv", "export_markdown", "export_docx"],
+    "Export Agent": ["export_pdf", "export_csv", "export_markdown", "export_docx", "export.media"],
     "CollaborationAgent": ["invite_member", "assign_role", "comment"],
     "VersionAgent": ["save_version", "rollback_version", "fork_project"],
     "ThermalAgent": ["analyze_thermal_risk"],

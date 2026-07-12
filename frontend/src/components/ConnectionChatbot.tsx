@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, Bot, User, Trash2, Cpu, HelpCircle, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, Bot, User, Trash2, Cpu, HelpCircle, Loader2, Volume2, VolumeX } from 'lucide-react';
 
 interface ChatMessage {
   sender: 'user' | 'bot';
@@ -22,6 +22,8 @@ export default function ConnectionChatbot({ projectContext }: ConnectionChatbotP
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(null);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -42,6 +44,48 @@ export default function ConnectionChatbot({ projectContext }: ConnectionChatbotP
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      audioElement?.pause();
+    };
+  }, [audioElement]);
+
+  const handleSpeak = async (text: string, idx: number) => {
+    if (playingMessageIndex === idx) {
+      audioElement?.pause();
+      setPlayingMessageIndex(null);
+      return;
+    }
+
+    audioElement?.pause();
+    setPlayingMessageIndex(idx);
+
+    try {
+      const res = await fetch("http://localhost:8000/api/speech/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.onended = () => {
+          setPlayingMessageIndex(null);
+        };
+        audio.play();
+        setAudioElement(audio);
+      } else {
+        setPlayingMessageIndex(null);
+      }
+    } catch (err) {
+      console.error("Audio playback error:", err);
+      setPlayingMessageIndex(null);
+    }
+  };
 
   const handleSend = async (textToSend?: string) => {
     const queryText = textToSend || input;
@@ -168,9 +212,31 @@ export default function ConnectionChatbot({ projectContext }: ConnectionChatbotP
               }`}
             >
               {msg.text}
-              <span className="block text-[8px] text-slate-500 mt-1.5 text-right">
-                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
+              <div className="flex items-center justify-between gap-4 mt-2 pt-1.5 border-t border-slate-800/40 text-[9px]">
+                {msg.sender === 'bot' ? (
+                  <button
+                    onClick={() => handleSpeak(msg.text, idx)}
+                    className="flex items-center gap-1.5 text-cyan-400/70 hover:text-cyan-400 font-bold transition-all cursor-pointer select-none"
+                  >
+                    {playingMessageIndex === idx ? (
+                      <>
+                        <VolumeX className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Stop</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span>Speak</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div />
+                )}
+                <span className="text-slate-500 font-mono">
+                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
             </div>
           </div>
         ))}

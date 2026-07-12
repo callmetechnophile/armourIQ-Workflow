@@ -127,6 +127,53 @@ export default function DatasheetPanel({ datasheets }: DatasheetPanelProps) {
           </div>
         </div>
       </div>
+      
+      {/* Component Datasheet Links list */}
+      <div className="lg:col-span-3 glass-panel p-6 border border-blue-500/20 bg-zinc-950/40 font-mono mt-6 space-y-4">
+        <h3 className="text-sm font-semibold text-cyan-400 glow-cyan flex items-center gap-2">
+          <FileText className="w-4 h-4 text-cyan-400" />
+          Component Datasheet Links list
+        </h3>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse font-mono">
+            <thead>
+              <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                <th className="py-2.5 px-3">Component name</th>
+                <th className="py-2.5 px-3">datasheet link</th>
+              </tr>
+            </thead>
+            <tbody>
+              {datasheets.map((item, idx) => (
+                <tr key={idx} className="border-b border-slate-900/60 hover:bg-slate-900/20 transition-all">
+                  <td className="py-3 px-3 text-slate-200 font-semibold">{item.component}</td>
+                  <td className="py-3 px-3">
+                    <a 
+                      href={item.datasheet_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-cyan-400 hover:text-cyan-300 break-all flex items-center gap-1.5"
+                    >
+                      {item.datasheet_link}
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Copyable Markdown Format Area */}
+        <div className="space-y-2 pt-2">
+          <span className="text-[10px] text-slate-500 font-mono tracking-widest uppercase block">Copyable Markdown Format</span>
+          <pre className="p-3 bg-slate-950 border border-slate-900 rounded text-[11px] text-slate-400 font-mono overflow-x-auto select-all max-h-[160px]">
+{`Component name | datasheet link |\n` +
+`---|---|\n` +
+datasheets.map(item => `${item.component} | ${item.datasheet_link} |`).join('\n')}
+          </pre>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { use, useState, useEffect } from 'react';
-import { Users, Shield, MessageSquare, ListTodo, Plus, Info, Home, UserPlus } from 'lucide-react';
+import { Users, Shield, MessageSquare, ListTodo, Plus, Info, Home, UserPlus, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 
 interface TeamPageProps {
@@ -24,6 +24,7 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
   const [inviteRole, setInviteRole] = useState('Engineer');
   const [inviteTeamName, setInviteTeamName] = useState('');
   const [inviteResult, setInviteResult] = useState<any>(null);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     async function loadTeamData() {
@@ -67,7 +68,8 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
       if (!res.ok) throw new Error("Failed to generate invitation link.");
       const result = await res.json();
       setInviteResult(result);
-      alert("Email Sent. Check in Junk/Spam Folder");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 6000);
       // Refresh activity log
       if (team) {
         const resActs = await fetch(`/api/collaboration/activity/${team.id}`);
@@ -103,7 +105,20 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-slate-100 font-mono p-6 flex flex-col justify-between">
+    <>
+      {showToast && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-zinc-950/95 border border-cyan-500/40 p-4 rounded-xl shadow-2xl animate-fade-in font-mono max-w-sm">
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping absolute -top-1 -right-1" />
+          <CheckCircle2 className="w-5 h-5 text-cyan-400 shrink-0" />
+          <div>
+            <span className="text-[10px] text-cyan-400 font-extrabold uppercase tracking-widest block">Notification</span>
+            <p className="text-[11px] font-bold text-slate-100 uppercase tracking-wide mt-0.5 leading-normal">
+              EMAIL SENT CHECK YOU JUNK/SPAM FOLDER
+            </p>
+          </div>
+        </div>
+      )}
+      <div className="min-h-screen bg-zinc-950 text-slate-100 font-mono p-6 flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto space-y-6">
         {/* Header navigation */}
         <div className="flex items-center justify-between border-b border-slate-900 pb-4">
@@ -302,5 +317,6 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, UserPlus, MessageSquare, Send, Activity, Shield } from "lucide-react";
+import { Users, UserPlus, MessageSquare, Send, Activity, Shield, CheckCircle2 } from "lucide-react";
 
 interface Member {
   id: number;
@@ -46,6 +46,7 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
   const [inviteRole, setInviteRole] = useState("Engineer");
   const [inviteTeamName, setInviteTeamName] = useState("");
   const [inviteResult, setInviteResult] = useState<any>(null);
+  const [showToast, setShowToast] = useState(false);
   
   const [newComment, setNewComment] = useState("");
   const [commentSection, setCommentSection] = useState("General");
@@ -68,7 +69,8 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
       if (res.ok) {
         const result = await res.json();
         setInviteResult(result);
-        alert("Email Sent. Check in Junk/Spam Folder");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 6000);
         
         // Add invitee placeholder to local members view
         const placeholderMember = {
@@ -126,7 +128,20 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 p-4">
+    <>
+      {showToast && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-zinc-950/95 border border-cyan-500/40 p-4 rounded-xl shadow-2xl animate-fade-in font-mono max-w-sm">
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping absolute -top-1 -right-1" />
+          <CheckCircle2 className="w-5 h-5 text-cyan-400 shrink-0" />
+          <div>
+            <span className="text-[10px] text-cyan-400 font-extrabold uppercase tracking-widest block">Notification</span>
+            <p className="text-[11px] font-bold text-slate-100 uppercase tracking-wide mt-0.5 leading-normal">
+              EMAIL SENT CHECK YOU JUNK/SPAM FOLDER
+            </p>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 p-4">
       {/* Team Members List & Invite */}
       <div className="glass-panel p-5 border border-zinc-800 bg-zinc-950/60 rounded-xl space-y-6">
         <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -326,5 +341,6 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
         </div>
       </div>
     </div>
+    </>
   );
 }

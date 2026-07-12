@@ -135,6 +135,60 @@ export default function PowerAnalysis({ data }: PowerAnalysisProps) {
           </table>
         </div>
       </div>
+
+      {/* Component Power Ratings list */}
+      <div className="glass-panel p-6 border border-blue-500/20 bg-zinc-950/40 space-y-4">
+        <h3 className="text-sm font-semibold text-cyan-400 glow-cyan flex items-center gap-2 font-mono">
+          <Zap className="w-4 h-4 text-cyan-400" />
+          Component Power Ratings list
+        </h3>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse font-mono">
+            <thead>
+              <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                <th className="py-2.5 px-3">Component name</th>
+                <th className="py-2.5 px-3 text-right">voltage rating</th>
+                <th className="py-2.5 px-3 text-right">current rating</th>
+                <th className="py-2.5 px-3 text-right">power rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {power_items.map((item, idx) => {
+                const currentRating = item.is_source ? "—" : `${item.nominal_current} mA`;
+                const powerRating = item.is_source 
+                  ? "—" 
+                  : `${((item.voltage * item.nominal_current) / 1000).toFixed(3)} W`;
+                
+                return (
+                  <tr key={idx} className="border-b border-slate-900/60 hover:bg-slate-900/20 transition-all">
+                    <td className="py-3 px-3 text-slate-200 font-semibold">{item.component}</td>
+                    <td className="py-3 px-3 text-right text-slate-300">{item.voltage} V</td>
+                    <td className="py-3 px-3 text-right text-cyan-400">{currentRating}</td>
+                    <td className="py-3 px-3 text-right text-emerald-400 font-bold">{powerRating}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Copyable Markdown Format Area */}
+        <div className="space-y-2 pt-2">
+          <span className="text-[10px] text-slate-500 font-mono tracking-widest uppercase block">Copyable Markdown Format</span>
+          <pre className="p-3 bg-slate-950 border border-slate-900 rounded text-[11px] text-slate-400 font-mono overflow-x-auto select-all max-h-[160px]">
+{`Component name | voltage rating | current rating | power rating |\n` +
+`---|---|---|---|\n` +
+power_items.map(item => {
+  const currentRating = item.is_source ? "—" : `${item.nominal_current} mA`;
+  const powerRating = item.is_source 
+    ? "—" 
+    : `${((item.voltage * item.nominal_current) / 1000).toFixed(3)} W`;
+  return `${item.component} | ${item.voltage} V | ${currentRating} | ${powerRating} |`;
+}).join('\n')}
+          </pre>
+        </div>
+      </div>
     </div>
   );
 }

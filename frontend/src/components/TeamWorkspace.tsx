@@ -68,6 +68,7 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
       if (res.ok) {
         const result = await res.json();
         setInviteResult(result);
+        alert("Email Sent. Check in Junk/Spam Folder");
         
         // Add invitee placeholder to local members view
         const placeholderMember = {

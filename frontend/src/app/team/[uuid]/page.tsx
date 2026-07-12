@@ -67,6 +67,7 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
       if (!res.ok) throw new Error("Failed to generate invitation link.");
       const result = await res.json();
       setInviteResult(result);
+      alert("Email Sent. Check in Junk/Spam Folder");
       // Refresh activity log
       if (team) {
         const resActs = await fetch(`/api/collaboration/activity/${team.id}`);

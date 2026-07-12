@@ -89,6 +89,9 @@ System Owner
 
 WorkflowGuide AI"""
 
+    # Dispatch via SMTP
+    send_email_via_smtp(email, email_subject, email_body)
+
     return {
         "raw_token": raw_token,
         "token_hash": token_hash,
@@ -381,14 +384,8 @@ WorkflowGuide AI"""
         import logging
         logging.getLogger("GraphLoader").warning(f"Could not store team details in AuraDB EKG: {e}")
         
-    # Log email template to terminal stdout for local debug/viewing
-    print("\n" + "="*60)
-    print("MOCK EMAIL SENT TO COLLABORATOR:")
-    print(f"To: {email}")
-    print(f"Subject: {invite['email_subject']}")
-    print("-" * 60)
-    print(invite['email_body'])
-    print("="*60 + "\n")
+    # Dispatch via SMTP
+    send_email_via_smtp(email, invite["email_subject"], invite["email_body"])
 
     return {
         "team_id": team_id,
@@ -398,3 +395,36 @@ WorkflowGuide AI"""
         "email_subject": invite["email_subject"],
         "email_body": invite["email_body"]
     }
+
+def send_email_via_smtp(recipient_email: str, subject: str, body: str) -> bool:
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = os.getenv("SMTP_PORT", "587")
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+    smtp_from = os.getenv("SMTP_FROM_EMAIL") or smtp_user
+    
+    if not smtp_host or not smtp_user or "your_email" in smtp_user:
+        print(f"[SMTP Notice] SMTP host/user not configured. Skipping email dispatch to {recipient_email}")
+        return False
+        
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = smtp_from
+        msg['To'] = recipient_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP(smtp_host, int(smtp_port))
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.sendmail(smtp_from, recipient_email, msg.as_string())
+        server.quit()
+        print(f"[SMTP Success] Secure invitation email dispatched to {recipient_email}")
+        return True
+    except Exception as e:
+        print(f"[SMTP Error] Failed to dispatch invitation email to {recipient_email}: {e}")
+        return False

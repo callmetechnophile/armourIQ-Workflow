@@ -44,6 +44,9 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
   
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Engineer");
+  const [inviteTeamName, setInviteTeamName] = useState("");
+  const [inviteResult, setInviteResult] = useState<any>(null);
+  
   const [newComment, setNewComment] = useState("");
   const [commentSection, setCommentSection] = useState("General");
   
@@ -51,22 +54,31 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail) return;
+    if (!inviteEmail || !inviteTeamName) return;
     try {
-      const res = await fetch(`${apiBase}/api/collaboration/members`, {
+      const res = await fetch(`${apiBase}/api/collaboration/teams/invite-collaborator`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          team_id: teamId,
-          user_id: `user_${Math.floor(Math.random() * 1000)}`,
+          team_name: inviteTeamName,
           email: inviteEmail,
           role: inviteRole
         })
       });
       if (res.ok) {
-        const newMember = await res.json();
-        setMembers([...members, newMember]);
-        setInviteEmail("");
+        const result = await res.json();
+        setInviteResult(result);
+        
+        // Add invitee placeholder to local members view
+        const placeholderMember = {
+          id: result.team_id,
+          user_id: `invited_user`,
+          email: inviteEmail,
+          role: inviteRole,
+          joined_at: new Date().toISOString()
+        };
+        setMembers([...members, placeholderMember]);
+        
         // Refresh logs
         fetchLogs();
       }
@@ -127,37 +139,80 @@ export default function TeamWorkspace({ teamData, projectId, apiBase }: TeamWork
         </div>
 
         {/* Invite Form */}
-        <form onSubmit={handleInvite} className="bg-zinc-900/60 p-4 border border-zinc-850 rounded-lg space-y-3">
-          <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <UserPlus className="w-3.5 h-3.5 text-cyan-400" /> Invite Collaborator
-          </div>
-          <div className="space-y-2">
-            <input
-              type="email"
-              placeholder="collaborator@company.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-cyan-500"
-            />
-            <div className="flex gap-2">
-              <select
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value)}
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-cyan-500"
-              >
-                <option value="Engineer">Engineer</option>
-                <option value="Reviewer">Reviewer</option>
-                <option value="Viewer">Viewer</option>
-              </select>
-              <button
-                type="submit"
-                className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs font-bold px-4 py-2 rounded transition-all"
-              >
-                Invite
-              </button>
+        {!inviteResult ? (
+          <form onSubmit={handleInvite} className="bg-zinc-900/60 p-4 border border-zinc-850 rounded-lg space-y-3">
+            <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <UserPlus className="w-3.5 h-3.5 text-cyan-400" /> Invite Collaborator
             </div>
+            <div className="space-y-2">
+              <input
+                type="text"
+                required
+                placeholder="New Team Name"
+                value={inviteTeamName}
+                onChange={(e) => setInviteTeamName(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-cyan-500"
+              />
+              <input
+                type="email"
+                required
+                placeholder="collaborator@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-cyan-500"
+              />
+              <div className="flex gap-2">
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-cyan-500"
+                >
+                  <option value="Engineer">Engineer</option>
+                  <option value="Reviewer">Reviewer</option>
+                  <option value="Viewer">Viewer</option>
+                </select>
+                <button
+                  type="submit"
+                  className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs font-bold px-4 py-2 rounded transition-all cursor-pointer"
+                >
+                  Invite
+                </button>
+              </div>
+            </div>
+          </form>
+        ) : (
+          <div className="bg-zinc-900/60 p-4 border border-cyan-800/20 rounded-lg space-y-3.5 text-xs font-mono">
+            <h4 className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5">
+              Secure Team Invite Generated
+            </h4>
+            <div>
+              <span className="text-[9px] text-slate-500 uppercase block font-semibold">Generated Numeric Team ID</span>
+              <span className="text-xs text-white font-bold tracking-wider block bg-zinc-950 px-2 py-1 rounded border border-zinc-800 mt-1 select-all">{inviteResult.team_id_numeric}</span>
+            </div>
+            <div>
+              <span className="text-[9px] text-slate-500 uppercase block font-semibold">Secure Joining Link</span>
+              <span className="text-[10px] text-cyan-400 block bg-zinc-950 px-2 py-1 rounded border border-zinc-800 mt-1 select-all truncate">{inviteResult.invite_url}</span>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] text-slate-500 uppercase block font-semibold">Email Subject</span>
+              <div className="bg-zinc-950 border border-zinc-800 p-1.5 rounded text-slate-200 font-bold select-all text-[10px]">{inviteResult.email_subject}</div>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] text-slate-500 uppercase block font-semibold">Email Body</span>
+              <pre className="bg-zinc-950 border border-zinc-800 p-2.5 rounded text-slate-300 whitespace-pre-wrap select-all text-[9px] overflow-y-auto max-h-[140px] leading-normal">{inviteResult.email_body}</pre>
+            </div>
+            <button
+              onClick={() => {
+                setInviteResult(null);
+                setInviteEmail("");
+                setInviteTeamName("");
+              }}
+              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs py-2 rounded transition-all cursor-pointer"
+            >
+              Done & Close
+            </button>
           </div>
-        </form>
+        )}
 
         {/* Members Cards */}
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">

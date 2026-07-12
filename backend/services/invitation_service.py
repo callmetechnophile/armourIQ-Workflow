@@ -270,3 +270,122 @@ def get_team_by_uuid(uuid_str: str) -> dict:
     if not row:
         return {}
     return dict(row)
+
+def create_and_invite_team(team_name: str, email: str, role: str) -> dict:
+    import random
+    import time
+    from backend.graph.graph_service import GraphService
+
+    conn = get_db_connection()
+    is_postgres = hasattr(conn, "cursor_factory")
+    
+    # 1. Generate unique 6-digit numeric Team ID
+    team_id_numeric = None
+    for _ in range(50):
+        candidate = str(random.randint(100000, 999999))
+        if is_postgres:
+            cursor = execute_query(conn, "SELECT id FROM teams WHERE uuid = %s", (candidate,))
+        else:
+            cursor = execute_query(conn, "SELECT id FROM teams WHERE uuid = ?", (candidate,))
+        if not cursor.fetchone():
+            team_id_numeric = candidate
+            break
+            
+    if not team_id_numeric:
+        team_id_numeric = str(random.randint(100000, 999999))
+        
+    # 2. Insert team into SQL transactional database
+    timestamp = datetime.utcnow().isoformat()
+    if is_postgres:
+        query_t = "INSERT INTO teams (uuid, name, created_at) VALUES (%s, %s, %s)"
+    else:
+        query_t = "INSERT INTO teams (uuid, name, created_at) VALUES (?, ?, ?)"
+    cursor = execute_query(conn, query_t, (team_id_numeric, team_name, timestamp))
+    team_id = cursor.lastrowid
+    if team_id is None:
+        try:
+            if is_postgres:
+                cursor.execute("SELECT currval(pg_get_serial_sequence('teams', 'id'))")
+                team_id = cursor.fetchone()[0]
+            else:
+                team_id = 1
+        except Exception:
+            team_id = 1
+    conn.commit()
+    conn.close()
+    
+    # Log team creation activity
+    from backend.services.collaboration_service import log_activity
+    log_activity(team_id, "system", "CREATE_TEAM", f"Team '{team_name}' with ID {team_id_numeric} was created.")
+    
+    # 3. Create secure invitation token
+    invite = create_team_invitation(team_id, email, role)
+    
+    # Override email body to show the 6-digit numeric Team ID
+    invite_url = invite["invite_url"]
+    invite["email_body"] = f"""Hi {email},
+
+You have been invited to collaborate on WorkflowGuide AI.
+
+Click the secure button below to join your team.
+
+------------------------------------------------
+
+[ Join Team ] ({invite_url})
+
+URL
+{invite_url}
+
+------------------------------------------------
+
+Team Information
+
+Team Name:
+{team_name}
+
+Team ID:
+{team_id_numeric}
+
+Invitation expires in:
+7 Days
+
+If you were not expecting this invitation, you may safely ignore this email.
+
+Best regards,
+System Owner
+
+WorkflowGuide AI"""
+
+    # 4. Store team name, numeric team id, and invite link in AuraDB (Neo4j)
+    try:
+        service = GraphService()
+        with service.driver.session() as session:
+            session.run(
+                "MERGE (t:Team {id: $team_id}) "
+                "SET t.name = $team_name, t.invite_url = $invite_url, t.created_at = $ts",
+                team_id=str(team_id_numeric),
+                team_name=team_name,
+                invite_url=invite_url,
+                ts=str(time.time())
+            )
+            session.run(
+                "MERGE (u:User {email: 'engineer@armourline.io'}) "
+                "WITH u "
+                "MATCH (t:Team {id: $team_id}) "
+                "MERGE (u)-[:MEMBER_OF]->(t) "
+                "MERGE (u)-[:OWNER_OF]->(t) "
+                "MERGE (u)-[:ENGINEER_IN]->(t)",
+                team_id=str(team_id_numeric)
+            )
+    except Exception as e:
+        import logging
+        logging.getLogger("GraphLoader").warning(f"Could not store team details in AuraDB EKG: {e}")
+        
+    return {
+        "team_id": team_id,
+        "team_id_numeric": team_id_numeric,
+        "team_name": team_name,
+        "invite_url": invite_url,
+        "email_subject": invite["email_subject"],
+        "email_body": invite["email_body"]
+    }

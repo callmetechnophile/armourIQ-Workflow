@@ -8,7 +8,7 @@ from backend.services.collaboration_service import (
 from backend.services.invitation_service import (
     create_team_invitation, get_team_invitation_by_token,
     accept_team_invitation, decline_team_invitation, get_team_by_id,
-    get_team_by_uuid
+    get_team_by_uuid, create_and_invite_team
 )
 
 from backend.armoriq.delegation import capture_plan, delegate, invoke_tool
@@ -207,5 +207,23 @@ def api_get_team_by_uuid(uuid: str):
         return team_info
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class CreateAndInviteRequest(BaseModel):
+    team_name: str
+    email: str
+    role: str
+
+@router.post("/teams/invite-collaborator")
+def api_create_and_invite(payload: CreateAndInviteRequest):
+    try:
+        root_receipt = capture_plan(f"Create team {payload.team_name} and invite {payload.email}")
+        collab_receipt = delegate(
+            agent_name="CollaborationAgent",
+            requested_scope=["invite_member"],
+            parent_receipt=root_receipt.model_dump()
+        )
+        return create_and_invite_team(payload.team_name, payload.email, payload.role)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

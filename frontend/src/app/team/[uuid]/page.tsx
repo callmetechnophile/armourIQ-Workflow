@@ -22,6 +22,7 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('Engineer');
+  const [inviteTeamName, setInviteTeamName] = useState('');
   const [inviteResult, setInviteResult] = useState<any>(null);
 
   useEffect(() => {
@@ -29,16 +30,11 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
       if (!uuid) return;
       setLoading(true);
       try {
-        // Resolve team ID from uuid first, or query directly
-        const res = await fetch(`/api/collaboration/invitations/team_uuid/${uuid}`);
-        // If there's no endpoint for resolving uuid, we can mock it or fetch general team info
-        // Wait! Let's implement this resolver endpoint in backend routes as well!
-        // To be safe, let's fetch from our invitations API if we need uuid info, 
-        // or let's create a backend endpoint: GET /api/collaboration/teams/uuid/{uuid}
         const resTeam = await fetch(`/api/collaboration/teams/uuid/${uuid}`);
         if (!resTeam.ok) throw new Error("Team workspace not found.");
         const teamData = await resTeam.json();
         setTeam(teamData);
+        setInviteTeamName(teamData.name || '');
 
         // Fetch members
         const resMembers = await fetch(`/api/collaboration/members/${teamData.id}`);
@@ -61,19 +57,21 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!team || !inviteEmail) return;
+    if (!inviteEmail || !inviteTeamName) return;
     try {
-      const res = await fetch(`/api/collaboration/teams/${team.id}/invite`, {
+      const res = await fetch(`/api/collaboration/teams/invite-collaborator`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: inviteEmail, role: inviteRole })
+        body: JSON.stringify({ team_name: inviteTeamName, email: inviteEmail, role: inviteRole })
       });
       if (!res.ok) throw new Error("Failed to generate invitation link.");
       const result = await res.json();
       setInviteResult(result);
       // Refresh activity log
-      const resActs = await fetch(`/api/collaboration/activity/${team.id}`);
-      if (resActs.ok) setActivities(await resActs.json());
+      if (team) {
+        const resActs = await fetch(`/api/collaboration/activity/${team.id}`);
+        if (resActs.ok) setActivities(await resActs.json());
+      }
     } catch (err: any) {
       alert(err.message || "Failed to create invitation");
     }
@@ -203,6 +201,18 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
             {!inviteResult ? (
               <form onSubmit={handleSendInvite} className="space-y-4 text-xs font-mono">
                 <div className="space-y-1.5">
+                  <label className="text-[10px] text-slate-400 uppercase">New Team Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={inviteTeamName}
+                    onChange={(e) => setInviteTeamName(e.target.value)}
+                    placeholder="Engineering Alpha"
+                    className="w-full bg-slate-900 border border-slate-800 rounded px-3 py-2 text-white outline-none focus:border-cyan-500"
+                  />
+                </div>
+                
+                <div className="space-y-1.5">
                   <label className="text-[10px] text-slate-400 uppercase">Invitee Email Address</label>
                   <input
                     type="email"
@@ -244,7 +254,21 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
                 </div>
               </form>
             ) : (
-              <div className="space-y-4 text-xs">
+              <div className="space-y-4 text-xs font-mono">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase">Generated Numeric Team ID</span>
+                  <div className="bg-slate-900 border border-slate-800 p-2 rounded text-slate-200 font-bold select-all text-xs">
+                    {inviteResult.team_id_numeric}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase">Secure Joining Link</span>
+                  <div className="bg-slate-900 border border-slate-800 p-2 rounded text-cyan-400 font-bold select-all text-[11px] truncate">
+                    {inviteResult.invite_url}
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase">Email Subject</span>
                   <div className="bg-slate-900 border border-slate-800 p-2 rounded text-slate-200 font-bold select-all">
@@ -254,7 +278,7 @@ export default function TeamWorkspacePage({ params }: TeamPageProps) {
 
                 <div className="space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase">Email Body Template</span>
-                  <pre className="bg-slate-900 border border-slate-800 p-3 rounded text-slate-300 font-mono whitespace-pre-wrap overflow-y-auto max-h-[220px] select-all">
+                  <pre className="bg-slate-900 border border-slate-800 p-3 rounded text-slate-300 font-mono whitespace-pre-wrap overflow-y-auto max-h-[160px] select-all">
                     {inviteResult.email_body}
                   </pre>
                 </div>

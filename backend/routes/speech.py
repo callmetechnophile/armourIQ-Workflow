@@ -33,12 +33,12 @@ def text_to_speech_endpoint(payload: TTSRequest):
         # Wrap read in ArmorIQ receipt enforcer
         root_receipt = capture_plan(f"Synthesize speech for text: {payload.text[:30]}...")
         speech_receipt = delegate(
-            agent_name="ExportAgent",  # We can delegate audio export/synthesis to the ExportAgent
+            agent_name="Export Agent",  # We can delegate audio export/synthesis to the ExportAgent
             requested_scope=["export.media"],
             parent_receipt=root_receipt.model_dump()
         )
         invoke_tool(
-            agent_name="ExportAgent",
+            agent_name="Export Agent",
             tool_name="export.media",
             args={"type": "audio", "text_length": len(payload.text)},
             receipt_dict=speech_receipt.model_dump()
@@ -66,12 +66,12 @@ async def speech_to_text_endpoint(file: UploadFile = File(...)):
         # Wrap read in ArmorIQ receipt enforcer
         root_receipt = capture_plan(f"Transcribe audio file: {file.filename}")
         speech_receipt = delegate(
-            agent_name="ExtractionAgent",
+            agent_name="Extraction Agent",
             requested_scope=["extraction.media"],
             parent_receipt=root_receipt.model_dump()
         )
         invoke_tool(
-            agent_name="ExtractionAgent",
+            agent_name="Extraction Agent",
             tool_name="extraction.media",
             args={"type": "audio", "filename": file.filename},
             receipt_dict=speech_receipt.model_dump()

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Network, Info, Sliders, Shield, Zap, Search, HelpCircle, Layers } from 'lucide-react';
+import { Network, Info, Sliders, Shield, Zap, Search, Eye, RefreshCw, Users, BookOpen, Layers, Clock, AlertTriangle, Cpu, Terminal, GitFork, UserCheck } from 'lucide-react';
 
 interface GraphNode {
   id: string;
@@ -20,12 +20,12 @@ interface GraphEdge {
   type: string;
 }
 
-interface KnowledgeGraphViewerProps {
+interface GraphExplorerProps {
   projectName: string;
   apiBase: string;
 }
 
-export default function KnowledgeGraphViewer({ projectName, apiBase }: KnowledgeGraphViewerProps) {
+export default function GraphExplorer({ projectName, apiBase }: GraphExplorerProps) {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
   const [edges, setEdges] = useState<GraphEdge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,63 +33,75 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [explorerQuery, setExplorerQuery] = useState<string>("");
 
   const containerRef = useRef<SVGSVGElement | null>(null);
   const simulationRef = useRef<number | null>(null);
   const draggingNodeRef = useRef<string | null>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
 
-  // Pan and Zoom State
+  // Pan and Zoom
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    async function fetchGraph() {
+    async function loadEKG() {
+      if (!projectName) return;
       setLoading(true);
       setError(null);
       try {
         const cleanName = projectName.replace(/ /g, "_");
-        const res = await fetch(`${apiBase}/api/graph/project/${cleanName}`);
-        if (!res.ok) throw new Error("Failed to fetch graph data");
+        const res = await fetch(`${apiBase}/api/graph/explorer/project/${cleanName}`);
+        if (!res.ok) throw new Error("AuraDB connection error. Verify database status.");
         const data = await res.json();
         
-        // Initialize positions
-        const initializedNodes = (data.nodes || []).map((node: any) => ({
-          ...node,
-          x: 400 + (Math.random() - 0.5) * 300,
-          y: 250 + (Math.random() - 0.5) * 200,
-          vx: 0,
-          vy: 0
+        // Map nodes into positions
+        const initializedNodes = (data.nodes || []).map((node: any, idx: number) => {
+          const col = idx % 4;
+          const row = idx // 4;
+          return {
+            ...node,
+            x: 80 + col * 200 + (Math.random() - 0.5) * 40,
+            y: 85 + row * 110 + (Math.random() - 0.5) * 30,
+            vx: 0,
+            vy: 0
+          };
+        });
+
+        // Resolve edge mappings into nodes ids
+        const formattedEdges = (data.edges || []).map((e: any) => ({
+          source: e.source,
+          target: e.target,
+          type: e.label || e.type
         }));
 
         setNodes(initializedNodes);
-        setEdges(data.edges || []);
+        setEdges(formattedEdges);
       } catch (err: any) {
         setError(err.message || "An error occurred");
       } finally {
         setLoading(false);
       }
     }
-    if (projectName) {
-      fetchGraph();
-    }
+
+    loadEKG();
   }, [projectName, apiBase]);
 
-  // Force-directed layout simulation loop
+  // Force-directed simulation step loop
   useEffect(() => {
     if (nodes.length === 0) return;
 
-    const width = 800;
+    const width = 850;
     const height = 500;
-    const strengthRepulsion = 400; // Coulomb repulsion between nodes
-    const strengthAttraction = 0.05; // Spring attraction along edges
-    const centerAttraction = 0.01; // Attraction to center
-    const damping = 0.85;
+    const strengthRepulsion = 600;
+    const strengthAttraction = 0.08;
+    const centerAttraction = 0.015;
+    const damping = 0.8;
 
     function step() {
-      // 1. Repulsion force between all nodes
+      // Repulsion between nodes
       for (let i = 0; i < nodes.length; i++) {
         const nodeA = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
@@ -101,7 +113,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
           const distSq = dx * dx + dy * dy + 0.1;
           const dist = Math.sqrt(distSq);
 
-          if (dist < 200) {
+          if (dist < 180) {
             const force = strengthRepulsion / distSq;
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
@@ -118,7 +130,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
         }
       }
 
-      // 2. Attraction force along edges
+      // Spring attraction along edges
       edges.forEach(edge => {
         const sourceNode = nodes.find(n => n.id === edge.source);
         const targetNode = nodes.find(n => n.id === edge.target);
@@ -128,8 +140,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
           const dy = targetNode.y - sourceNode.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
           
-          // Optimal spring length = 120px
-          const force = (dist - 120) * strengthAttraction;
+          const force = (dist - 110) * strengthAttraction;
           const fx = (dx / dist) * force;
           const fy = (dy / dist) * force;
 
@@ -144,7 +155,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
         }
       });
 
-      // 3. Gravity center pull and update positions
+      // Gravity pull to center
       nodes.forEach(node => {
         if (node.id === draggingNodeRef.current) return;
 
@@ -158,13 +169,12 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
           node.x += node.vx;
           node.y += node.vy;
 
-          // Boundary limits
+          // Boundaries
           node.x = Math.max(50, Math.min(width - 50, node.x));
           node.y = Math.max(50, Math.min(height - 50, node.y));
         }
       });
 
-      // React state update
       setNodes([...nodes]);
       simulationRef.current = requestAnimationFrame(step);
     }
@@ -174,7 +184,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
     return () => {
       if (simulationRef.current) cancelAnimationFrame(simulationRef.current);
     };
-  }, [edges]); // Re-run whenever topology (edges) are initialized
+  }, [edges]);
 
   const handleNodeMouseDown = (nodeId: string, e: React.MouseEvent<SVGGElement>) => {
     e.stopPropagation();
@@ -184,7 +194,6 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
       setSelectedNode(clickedNode);
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        // Mouse in SVG coordinate space taking zoom and pan into account
         const mouseX = (e.clientX - rect.left - pan.x) / zoom;
         const mouseY = (e.clientY - rect.top - pan.y) / zoom;
         dragOffsetRef.current = {
@@ -235,7 +244,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
   };
 
   const handleZoom = (factor: number) => {
-    setZoom(prev => Math.max(0.3, Math.min(3, prev * factor)));
+    setZoom(prev => Math.max(0.3, Math.min(2.5, prev * factor)));
   };
 
   const resetPanZoom = () => {
@@ -243,27 +252,93 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
     setZoom(1);
   };
 
-  // Node Color Helper
   const getNodeColor = (type: string) => {
     switch (type) {
       case "Project": return { border: "#eab308", fill: "#eab30815" }; // Gold
-      case "Component": return { border: "#3b82f6", fill: "#3b82f615" }; // Blue
-      case "Microcontroller": return { border: "#6366f1", fill: "#6366f115" }; // Indigo
-      case "Sensor": return { border: "#10b981", fill: "#10b98115" }; // Emerald
-      case "Actuator":
-      case "Motor": return { border: "#d946ef", fill: "#d946ef15" }; // Fuchsia
-      case "Battery": return { border: "#f97316", fill: "#f9731615" }; // Orange
-      case "Protocol": return { border: "#06b6d4", fill: "#06b6d415" }; // Cyan
-      case "Pin": return { border: "#14b8a6", fill: "#14b8a615" }; // Teal
-      case "Datasheet": return { border: "#84cc16", fill: "#84cc1615" }; // Lime
+      case "User": return { border: "#3b82f6", fill: "#3b82f615" }; // Blue
+      case "Team": return { border: "#a855f7", fill: "#a855f715" }; // Purple
+      case "Component": return { border: "#6366f1", fill: "#6366f115" }; // Indigo
+      case "Vendor": return { border: "#d946ef", fill: "#d946ef15" }; // Fuchsia
       case "ResearchPaper": return { border: "#ec4899", fill: "#ec489915" }; // Pink
+      case "Datasheet": return { border: "#14b8a6", fill: "#14b8a615" }; // Teal
+      case "Battery": return { border: "#f97316", fill: "#f9731615" }; // Orange
+      case "Sensor": return { border: "#10b981", fill: "#10b98115" }; // Emerald
+      case "Protocol": return { border: "#06b6d4", fill: "#06b6d415" }; // Cyan
+      case "Code": return { border: "#0284c7", fill: "#0284c715" }; // Sky
+      case "Agent": return { border: "#0891b2", fill: "#0891b215" }; // Cyan/Teal
       case "FailureMode": return { border: "#ef4444", fill: "#ef444415" }; // Red
-      case "Vendor": return { border: "#a855f7", fill: "#a855f715" }; // Purple
-      default: return { border: "#64748b", fill: "#64748b15" }; // Slate
+      default: return { border: "#64748b", fill: "#64748b15" };
     }
   };
 
-  // Filter & Search Logic
+  const getEdgeColor = (type: string) => {
+    switch (type) {
+      case "POWERED_BY": return "#f97316";
+      case "CONNECTED_TO": return "#06b6d4";
+      case "COMMUNICATES_VIA": return "#10b981";
+      case "DELEGATES_TO": return "#a855f7";
+      case "CONTRADICTS": return "#ef4444";
+      default: return "#475569";
+    }
+  };
+
+  // Traversal Expansion click
+  const handleNodeDoubleClick = async (nodeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    // Dynamically retrieve node details / expansions
+    try {
+      const cleanName = node.label.replace(/ /g, "_");
+      let endpoint = `/api/graph/explorer/component/${cleanName}`;
+      if (node.type === "Team") endpoint = `/api/graph/explorer/team/${cleanName}`;
+      else if (node.type === "User") endpoint = `/api/graph/explorer/user/${cleanName}`;
+      else if (node.type === "Project") endpoint = `/api/graph/explorer/project/${cleanName}`;
+      
+      const res = await fetch(endpoint);
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Merge nodes
+        const currentIds = new Set(nodes.map(n => n.id));
+        const newNodes: GraphNode[] = [];
+        
+        (data.nodes || []).forEach((n: any) => {
+          if (!currentIds.has(n.id)) {
+            newNodes.push({
+              ...n,
+              x: (node.x || 400) + (Math.random() - 0.5) * 150,
+              y: (node.y || 250) + (Math.random() - 0.5) * 150,
+              vx: 0,
+              vy: 0
+            });
+          }
+        });
+        
+        // Merge edges
+        const currentEdgeKeys = new Set(edges.map(e => `${e.source}_${e.target}`));
+        const newEdges: GraphEdge[] = [];
+        (data.edges || []).forEach((e: any) => {
+          const key = `${e.source}_${e.target}`;
+          if (!currentEdgeKeys.has(key)) {
+            newEdges.push({
+              source: e.source,
+              target: e.target,
+              type: e.label || e.type
+            });
+          }
+        });
+
+        setNodes([...nodes, ...newNodes]);
+        setEdges([...edges, ...newEdges]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Filters & Search Highlight
   const filteredNodes = nodes.filter(node => {
     const matchesSearch = node.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           node.type.toLowerCase().includes(searchQuery.toLowerCase());
@@ -277,7 +352,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
     return (
       <div className="flex flex-col items-center justify-center p-12 text-slate-400 font-mono">
         <Network className="w-12 h-12 mb-3 stroke-1 text-cyan-500 animate-spin" />
-        <span className="text-xs">Querying AuraDB Engineering Knowledge Graph...</span>
+        <span className="text-xs">Querying AuraDB EKG Reasoner...</span>
       </div>
     );
   }
@@ -285,41 +360,42 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-slate-400 font-mono border border-red-500/20 rounded bg-red-950/5">
-        <Shield className="w-12 h-12 mb-3 stroke-1 text-red-500 animate-pulse" />
-        <span className="text-xs text-red-400">Failed to load Knowledge Graph Layer: {error}</span>
+        <Shield className="w-12 h-12 mb-3 stroke-1 text-red-500" />
+        <span className="text-xs text-red-400">EKG Offline: {error}</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {/* Search & Filtering Toolbar */}
+      {/* Graph Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search graph..."
+              placeholder="Search EKG..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded pl-8 pr-3 py-1 text-xs text-slate-300 placeholder-slate-500 outline-none w-48 font-mono focus:border-cyan-800"
+              className="bg-slate-900 border border-slate-800 rounded pl-8 pr-3 py-1.5 text-xs text-slate-350 placeholder-slate-500 outline-none w-48 font-mono focus:border-cyan-800"
             />
           </div>
-          <div className="flex items-center gap-1.5 bg-slate-900/50 border border-slate-800 p-1 rounded">
+          
+          <div className="flex items-center gap-1 bg-slate-900/50 border border-slate-800 p-0.5 rounded overflow-x-auto max-w-[350px] scrollbar-none">
             <button
               onClick={() => setFilterType("all")}
-              className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded cursor-pointer ${
+              className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded cursor-pointer whitespace-nowrap ${
                 filterType === "all" ? "bg-cyan-950 text-cyan-400 font-bold border border-cyan-800/40" : "text-slate-400"
               }`}
             >
-              All Labels
+              All
             </button>
             {nodeTypesList.map(type => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded cursor-pointer ${
+                className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded cursor-pointer whitespace-nowrap ${
                   filterType === type ? "bg-cyan-950 text-cyan-400 font-bold border border-cyan-800/40" : "text-slate-400"
                 }`}
               >
@@ -329,22 +405,22 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-0.5 rounded">
-            <button onClick={() => handleZoom(1.2)} className="text-[10px] font-mono px-2 py-0.5 hover:text-white cursor-pointer">+</button>
-            <button onClick={() => handleZoom(0.8)} className="text-[10px] font-mono px-2 py-0.5 hover:text-white cursor-pointer">-</button>
+            <button onClick={() => handleZoom(1.15)} className="text-[10px] font-mono px-2 py-0.5 hover:text-white cursor-pointer">+</button>
+            <button onClick={() => handleZoom(0.85)} className="text-[10px] font-mono px-2 py-0.5 hover:text-white cursor-pointer">-</button>
             <button onClick={resetPanZoom} className="text-[9px] font-mono px-2 py-0.5 border-l border-slate-800 hover:text-white cursor-pointer">Reset</button>
           </div>
           <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
             <Info className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Interactive Graph: click node to inspect properties.</span>
+            <span>Double click node to traverse expand.</span>
           </div>
         </div>
       </div>
 
+      {/* SVG Canvas Board */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* SVG Graph Drawing Board */}
-        <div className="lg:col-span-3 border border-slate-800/80 bg-zinc-950/60 rounded-xl relative overflow-hidden h-[500px]">
+        <div className="lg:col-span-3 border border-slate-800/80 bg-zinc-950/60 rounded-xl relative overflow-hidden h-[520px]">
           <svg
             ref={containerRef}
             className="w-full h-full cursor-grab active:cursor-grabbing select-none"
@@ -353,13 +429,13 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
           >
-            {/* Background Grid Pattern */}
+            {/* Background Grid */}
             <defs>
-              <pattern id="graph-grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#ffffff03" strokeWidth="1" />
+              <pattern id="ekg-grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#ffffff03" strokeWidth="0.8" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#graph-grid)" />
+            <rect width="100%" height="100%" fill="url(#ekg-grid)" />
 
             <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
               {/* Draw Edges */}
@@ -368,7 +444,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                 const target = nodes.find(n => n.id === edge.target);
                 if (!source || !target || !source.x || !source.y || !target.x || !target.y) return null;
 
-                const color = getNodeColor(source.type).border;
+                const color = getEdgeColor(edge.type);
 
                 return (
                   <g key={`edge-${idx}`} className="group">
@@ -380,16 +456,21 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                       stroke={color}
                       strokeWidth="1.2"
                       strokeOpacity="0.4"
-                      className="transition-all duration-300 group-hover:stroke-opacity-90 group-hover:stroke-[1.8px]"
+                      className="transition-all duration-300 group-hover:stroke-opacity-95 group-hover:stroke-[1.8px]"
                     />
-                    {/* Tiny Direction Arrow */}
-                    <circle
-                      cx={(source.x + target.x) / 2}
-                      cy={(source.y + target.y) / 2}
-                      r="2"
+                    {/* Edge Label text along paths */}
+                    <text
+                      x={(source.x + target.x) / 2}
+                      y={(source.y + target.y) / 2 - 4}
+                      textAnchor="middle"
                       fill={color}
-                      opacity="0.6"
-                    />
+                      fontSize="7"
+                      fontFamily="monospace"
+                      opacity="0.8"
+                      className="pointer-events-none fill-slate-400"
+                    >
+                      {edge.type}
+                    </text>
                   </g>
                 );
               })}
@@ -406,21 +487,21 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                     key={node.id}
                     transform={`translate(${node.x}, ${node.y})`}
                     onMouseDown={(e) => handleNodeMouseDown(node.id, e)}
+                    onDoubleClick={(e) => handleNodeDoubleClick(node.id, e)}
                     className="cursor-pointer group"
                   >
-                    {/* Glowing effect around node */}
+                    {/* Glowing outer box */}
                     <rect
                       x="-65"
                       y="-16"
                       width="130"
                       height="32"
-                      rx="4"
+                      rx="5"
                       fill="none"
                       stroke={colors.border}
                       strokeWidth={isSelected ? 3 : 1.2}
-                      className="transition-all group-hover:stroke-cyan-400"
                       style={{
-                        filter: isSelected ? `drop-shadow(0 0 5px ${colors.border})` : 'none'
+                        filter: isSelected ? `drop-shadow(0 0 4px ${colors.border})` : 'none'
                       }}
                     />
                     <rect
@@ -428,7 +509,7 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                       y="-16"
                       width="130"
                       height="32"
-                      rx="4"
+                      rx="5"
                       fill="#09090b"
                       fillOpacity="0.9"
                     />
@@ -437,24 +518,24 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                       y="-16"
                       width="130"
                       height="32"
-                      rx="4"
+                      rx="5"
                       fill={colors.fill}
                     />
 
-                    {/* Node text */}
+                    {/* Text Label */}
                     <text
                       x="0"
                       y="3"
                       textAnchor="middle"
-                      fill="#f1f5f9"
-                      fontSize="8.5"
+                      fill="#f8fafc"
+                      fontSize="8"
                       fontFamily="monospace"
                       fontWeight="bold"
                     >
                       {node.label.length > 20 ? `${node.label.substring(0, 17)}...` : node.label}
                     </text>
 
-                    {/* Small circle indicator of Type */}
+                    {/* Node indicator */}
                     <circle
                       cx="-55"
                       cy="0"
@@ -468,32 +549,72 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
           </svg>
         </div>
 
-        {/* Selected Node Details Panel */}
+        {/* Selected Node Details side panel */}
         <div className="lg:col-span-1 space-y-4">
           <div className="glass-panel p-4 border border-blue-500/20 bg-zinc-950/40 font-mono h-full flex flex-col justify-between">
             <div>
               <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Sliders className="w-4 h-4 text-cyan-400" />
-                AuraDB Metadata
+                EKG Entity Details
               </h4>
               {selectedNode ? (
-                <div className="space-y-4">
+                <div className="space-y-4 text-xs">
                   <div>
-                    <span className="text-[9px] text-slate-500 block">Label Name</span>
+                    <span className="text-[9px] text-slate-500 block">Name</span>
                     <span className="text-xs text-slate-200 font-bold block">{selectedNode.label}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-slate-500 block">Node Label</span>
+                    <span className="text-[9px] text-slate-500 block">Label Label</span>
                     <span className="text-xs uppercase tracking-wider block font-bold text-cyan-400">
                       {selectedNode.type}
                     </span>
                   </div>
-                  <div className="border-t border-slate-800/80 pt-3">
+                  
+                  {/* Entity Specific Custom Fields */}
+                  {selectedNode.type === "Component" && (
+                    <div className="border-t border-slate-850 pt-3.5 space-y-2">
+                      <div>
+                        <span className="text-[9px] text-slate-500 block">Category</span>
+                        <span className="text-slate-350">{selectedNode.properties?.category || "Core Module"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-slate-500 block">Est. Cost</span>
+                        <span className="text-slate-350 font-bold">${selectedNode.properties?.cost || 0.0} USD</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNode.type === "Team" && (
+                    <div className="border-t border-slate-850 pt-3.5 space-y-2">
+                      <div>
+                        <span className="text-[9px] text-slate-500 block">Members count</span>
+                        <span className="text-slate-350">{selectedNode.properties?.members || 1} Collaborators</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-slate-500 block">Workspace uuid</span>
+                        <span className="text-slate-350 font-bold text-[10px] break-all">{selectedNode.properties?.uuid || "N/A"}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNode.type === "Project" && (
+                    <div className="border-t border-slate-850 pt-3.5 space-y-2">
+                      <div>
+                        <span className="text-[9px] text-slate-500 block">Evolution Version</span>
+                        <span className="text-slate-350 font-bold flex items-center gap-1">
+                          <GitFork className="w-3.5 h-3.5 text-cyan-400" />
+                          v1 &rarr; v2 &rarr; v3
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="border-t border-slate-850 pt-3.5">
                     <span className="text-[9px] text-slate-500 block mb-1">Properties (JSON)</span>
-                    <div className="bg-zinc-900/60 p-2.5 rounded border border-slate-850 overflow-y-auto max-h-[160px] text-[10px] text-slate-300 scrollbar-none">
+                    <div className="bg-zinc-900/60 p-2.5 border border-slate-850 rounded overflow-y-auto max-h-[160px] text-[10px] text-slate-300 scrollbar-none leading-normal">
                       {Object.keys(selectedNode.properties || {}).length > 0 ? (
                         Object.entries(selectedNode.properties).map(([k, v]) => (
-                          <div key={k} className="mb-1 leading-normal">
+                          <div key={k} className="mb-1.5">
                             <span className="text-cyan-500 font-semibold">{k}:</span> <span className="text-slate-100">{String(v)}</span>
                           </div>
                         ))
@@ -505,14 +626,14 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                 </div>
               ) : (
                 <div className="text-xs text-slate-500 italic p-3 border border-slate-900 border-dashed rounded text-center">
-                  Click on any node to traverse and retrieve properties from AuraDB.
+                  Click on any node to query properties from AuraDB. Double-click to traverse expand.
                 </div>
               )}
             </div>
 
             {/* Colors Legend */}
             <div className="border-t border-slate-800 pt-4 mt-4 space-y-2">
-              <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Graph Legends</h5>
+              <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">EKG Legends</h5>
               <div className="grid grid-cols-2 gap-1.5 text-[9px]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#eab308]"></span>
@@ -520,31 +641,23 @@ export default function KnowledgeGraphViewer({ projectName, apiBase }: Knowledge
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#3b82f6]"></span>
+                  <span className="text-slate-400">User</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#a855f7]"></span>
+                  <span className="text-slate-400">Team</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#6366f1]"></span>
                   <span className="text-slate-400">Component</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#06b6d4]"></span>
-                  <span className="text-slate-400">Protocol</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#14b8a6]"></span>
-                  <span className="text-slate-400">Pin</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#84cc16]"></span>
-                  <span className="text-slate-400">Datasheet</span>
-                </div>
-                <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#ec4899]"></span>
-                  <span className="text-slate-400">Research</span>
+                  <span className="text-slate-400">Paper</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#ef4444]"></span>
                   <span className="text-slate-400">Failure Mode</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#a855f7]"></span>
-                  <span className="text-slate-400">Vendor</span>
                 </div>
               </div>
             </div>

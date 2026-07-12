@@ -390,11 +390,11 @@ def run_engineering_pipeline(user_intent: str, target_days: int = 22) -> Dict[st
     
     # Automatically Ingest generated project graph into AuraDB
     try:
-        from backend.database.graph.graph_service import GraphService
-        GraphService().ingest_project(project_id, package_data)
+        from backend.graph.graph_service import GraphService
+        GraphService().ingest_project("engineer@armourline.io", "Engineering Team", project_id, package_data, list(AUDIT_LOGS))
     except Exception as e:
         import logging
-        logging.getLogger("PlannerAgent").warning(f"Failed to ingest project graph to AuraDB: {e}")
+        logging.getLogger("PlannerAgent").warning(f"Failed to ingest complete EKG project graph to AuraDB: {e}")
     
     # 11. Compile final output payload
     return {

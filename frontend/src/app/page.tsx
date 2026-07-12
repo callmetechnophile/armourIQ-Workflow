@@ -39,7 +39,7 @@ import VersionHistory from '@/components/VersionHistory';
 import ContradictionViewer from '@/components/ContradictionViewer';
 import ThermalRiskPanel from '@/components/ThermalRiskPanel';
 import ProcurementHeatmap from '@/components/ProcurementHeatmap';
-import KnowledgeGraphViewer from '@/components/KnowledgeGraphViewer';
+import GraphExplorer from '@/components/GraphExplorer';
 
 const DASHBOARD_TABS = [
   { id: "bom", label: "BOM" },
@@ -896,7 +896,7 @@ ${rawBackground.trim()}
                 <ProcurementHeatmap components={pipelineData.components} />
               )}
               {activeDashboardTab === 'knowledge_graph' && (
-                <KnowledgeGraphViewer 
+                <GraphExplorer 
                   projectName={pipelineData.version_history?.project_id || pipelineData.intent} 
                   apiBase={apiBase}
                 />

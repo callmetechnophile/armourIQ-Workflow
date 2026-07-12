@@ -222,6 +222,57 @@ def init_db():
             cursor.execute("INSERT OR IGNORE INTO roles (name, permissions) VALUES ('Viewer', 'read')")
         except Exception:
             pass
+
+    # Dynamic Schema Upgrades (Teams UUID & Team Invitations)
+    try:
+        cursor.execute("ALTER TABLE teams ADD COLUMN uuid TEXT")
+    except Exception:
+        pass
+
+    # Update existing teams with UUIDs if they are null/empty
+    try:
+        cursor.execute("SELECT id, uuid FROM teams")
+        rows = cursor.fetchall()
+        import uuid
+        for row in rows:
+            if not row or not row[1] if not is_postgres else not row["uuid"]:
+                new_uuid = str(uuid.uuid4())
+                if is_postgres:
+                    cursor.execute("UPDATE teams SET uuid = %s WHERE id = %s", (new_uuid, row["id"]))
+                else:
+                    cursor.execute("UPDATE teams SET uuid = ? WHERE id = ?", (new_uuid, row["id"]))
+    except Exception as e:
+        print(f"[DB Schema Upgrade Warning] Could not update team UUIDs: {e}")
+
+    # Create Team Invitations table
+    if is_postgres:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS team_invitations (
+                id SERIAL PRIMARY KEY,
+                team_id INTEGER NOT NULL,
+                token_hash TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL,
+                role TEXT NOT NULL,
+                status TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                receipt_id TEXT
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS team_invitations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                team_id INTEGER NOT NULL,
+                token_hash TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL,
+                role TEXT NOT NULL,
+                status TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                receipt_id TEXT
+            )
+        """)
     conn.commit()
     conn.close()
 

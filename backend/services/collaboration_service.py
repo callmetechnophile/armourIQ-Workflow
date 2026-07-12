@@ -3,10 +3,12 @@ from datetime import datetime
 from backend.database import get_db_connection, execute_query
 
 def create_team(name: str) -> dict:
+    import uuid
+    team_uuid = str(uuid.uuid4())
     conn = get_db_connection()
     timestamp = datetime.utcnow().isoformat()
-    query = "INSERT INTO teams (name, created_at) VALUES (?, ?)"
-    cursor = execute_query(conn, query, (name, timestamp))
+    query = "INSERT INTO teams (uuid, name, created_at) VALUES (?, ?, ?)"
+    cursor = execute_query(conn, query, (team_uuid, name, timestamp))
     team_id = cursor.lastrowid
     if team_id is None:
         try:
@@ -19,7 +21,7 @@ def create_team(name: str) -> dict:
     
     log_activity(team_id, "system", "CREATE_TEAM", f"Team '{name}' was created.")
     
-    return {"id": team_id, "name": name, "created_at": timestamp}
+    return {"id": team_id, "uuid": team_uuid, "name": name, "created_at": timestamp}
 
 def invite_member(team_id: int, user_id: str, email: str, role: str) -> dict:
     conn = get_db_connection()

@@ -39,6 +39,7 @@ import VersionHistory from '@/components/VersionHistory';
 import ContradictionViewer from '@/components/ContradictionViewer';
 import ThermalRiskPanel from '@/components/ThermalRiskPanel';
 import ProcurementHeatmap from '@/components/ProcurementHeatmap';
+import KnowledgeGraphViewer from '@/components/KnowledgeGraphViewer';
 
 const DASHBOARD_TABS = [
   { id: "bom", label: "BOM" },
@@ -50,6 +51,7 @@ const DASHBOARD_TABS = [
   { id: "contradictions", label: "Research Conflicts" },
   { id: "thermal", label: "Thermal Analysis" },
   { id: "heatmap", label: "Procurement Heatmap" },
+  { id: "knowledge_graph", label: "Knowledge Graph" },
   { id: "team_workspace", label: "Team Workspace" },
   { id: "version_history", label: "Version History" },
   { id: "assistant", label: "Connection Assistant" },
@@ -892,6 +894,12 @@ ${rawBackground.trim()}
               )}
               {activeDashboardTab === 'heatmap' && (
                 <ProcurementHeatmap components={pipelineData.components} />
+              )}
+              {activeDashboardTab === 'knowledge_graph' && (
+                <KnowledgeGraphViewer 
+                  projectName={pipelineData.version_history?.project_id || pipelineData.intent} 
+                  apiBase={apiBase}
+                />
               )}
               {activeDashboardTab === 'team_workspace' && (
                 <TeamWorkspace 

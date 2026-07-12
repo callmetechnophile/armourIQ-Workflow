@@ -21,5 +21,6 @@ AGENT_SCOPES: Dict[str, List[str]] = {
     "ThermalAgent": ["analyze_thermal_risk"],
     "ContradictionAgent": ["detect_contradictions"],
     "KnowledgeGraphAgent": ["graph.read", "graph.insert", "graph.update"],
-    "CalendarAgent": ["calendar.export", "calendar.update", "calendar.download"]
+    "CalendarAgent": ["calendar.export", "calendar.update", "calendar.download"],
+    "CalendarExportAgent": ["calendar.export", "calendar.generate_link"]
 }

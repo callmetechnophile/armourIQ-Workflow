@@ -74,3 +74,18 @@ async def download_ics(project_id: int):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+class GenerateLinksSchema(BaseModel):
+    project_id: int
+    task_ids: List[str]
+    timezone: str
+
+@router.post("/generate-links")
+async def generate_links(payload: GenerateLinksSchema, user_id: str = Depends(get_current_user)):
+    try:
+        from backend.services.google_calendar_export import generate_multiple_event_links
+        return generate_multiple_event_links(payload.project_id, payload.task_ids, payload.timezone)
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

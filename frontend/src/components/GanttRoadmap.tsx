@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Calendar, CheckCircle2, ChevronRight } from 'lucide-react';
-import ExportCalendarModal from './ExportCalendarModal';
+import GoogleCalendarExportModal from './GoogleCalendarExportModal';
 
 interface GanttTask {
   id: string;
@@ -63,11 +63,11 @@ export default function GanttRoadmap({ roadmap, gantt, projectId, projectName }:
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsExportModalOpen(true)}
-              title="Sync your engineering schedule with your preferred calendar."
+              title="Export your engineering timeline directly to Google Calendar."
               className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-3 py-1.5 rounded transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-cyan-900/10"
             >
               <Calendar className="w-3.5 h-3.5" />
-              📅 Export to Calendar
+              📅 Export to Google Calendar
             </button>
             <span className="text-xs text-slate-400">Scale: 1 day = 22px</span>
           </div>
@@ -228,11 +228,12 @@ export default function GanttRoadmap({ roadmap, gantt, projectId, projectName }:
           </div>
         ))}
       </div>
-      <ExportCalendarModal
+      <GoogleCalendarExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         projectId={projectId || 1}
         projectName={projectName || "WorkflowGuide Project"}
+        ganttTasks={gantt}
       />
     </div>
   );

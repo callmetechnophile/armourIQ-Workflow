@@ -274,15 +274,22 @@ def init_db():
             )
         """)
 
-    # Create Calendar Exports table
+    # Re-create Calendar Exports table with correct fields
+    try:
+        cursor.execute("DROP TABLE IF EXISTS calendar_exports")
+    except Exception:
+        pass
+
     if is_postgres:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS calendar_exports (
                 id SERIAL PRIMARY KEY,
                 project_id TEXT NOT NULL,
-                calendar_type TEXT NOT NULL,
                 export_time TEXT NOT NULL,
-                export_status TEXT NOT NULL
+                export_type TEXT NOT NULL,
+                calendar_link TEXT,
+                tasks_exported TEXT,
+                status TEXT NOT NULL
             )
         """)
     else:
@@ -290,9 +297,11 @@ def init_db():
             CREATE TABLE IF NOT EXISTS calendar_exports (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 project_id TEXT NOT NULL,
-                calendar_type TEXT NOT NULL,
                 export_time TEXT NOT NULL,
-                export_status TEXT NOT NULL
+                export_type TEXT NOT NULL,
+                calendar_link TEXT,
+                tasks_exported TEXT,
+                status TEXT NOT NULL
             )
         """)
 

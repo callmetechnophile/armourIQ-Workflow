@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, CheckCircle2, ChevronRight } from 'lucide-react';
+import ExportCalendarModal from './ExportCalendarModal';
 
 interface GanttTask {
   id: string;
@@ -24,9 +25,12 @@ interface RoadmapPhase {
 interface GanttRoadmapProps {
   roadmap: RoadmapPhase[];
   gantt: GanttTask[];
+  projectId?: number;
+  projectName?: string;
 }
 
-export default function GanttRoadmap({ roadmap, gantt }: GanttRoadmapProps) {
+export default function GanttRoadmap({ roadmap, gantt, projectId, projectName }: GanttRoadmapProps) {
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   if (!roadmap || roadmap.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-slate-400">
@@ -56,7 +60,17 @@ export default function GanttRoadmap({ roadmap, gantt }: GanttRoadmapProps) {
             <Calendar className="w-5 h-5" />
             Execution Timeline (Gantt Schedule)
           </h3>
-          <span className="text-xs text-slate-400">Scale: 1 day = 22px</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              title="Sync your engineering schedule with your preferred calendar."
+              className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-3 py-1.5 rounded transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-cyan-900/10"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              📅 Export to Calendar
+            </button>
+            <span className="text-xs text-slate-400">Scale: 1 day = 22px</span>
+          </div>
         </div>
         
         <div className="overflow-x-auto pb-2">
@@ -214,6 +228,12 @@ export default function GanttRoadmap({ roadmap, gantt }: GanttRoadmapProps) {
           </div>
         ))}
       </div>
+      <ExportCalendarModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        projectId={projectId || 1}
+        projectName={projectName || "WorkflowGuide Project"}
+      />
     </div>
   );
 }

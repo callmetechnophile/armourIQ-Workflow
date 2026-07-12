@@ -273,6 +273,29 @@ def init_db():
                 receipt_id TEXT
             )
         """)
+
+    # Create Calendar Exports table
+    if is_postgres:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS calendar_exports (
+                id SERIAL PRIMARY KEY,
+                project_id TEXT NOT NULL,
+                calendar_type TEXT NOT NULL,
+                export_time TEXT NOT NULL,
+                export_status TEXT NOT NULL
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS calendar_exports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id TEXT NOT NULL,
+                calendar_type TEXT NOT NULL,
+                export_time TEXT NOT NULL,
+                export_status TEXT NOT NULL
+            )
+        """)
+
     conn.commit()
     conn.close()
 

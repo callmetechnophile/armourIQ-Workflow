@@ -863,6 +863,8 @@ ${rawBackground.trim()}
                   <GanttRoadmap 
                     roadmap={pipelineData.roadmap} 
                     gantt={pipelineData.gantt} 
+                    projectId={pipelineData.version_history?.project_id || 1}
+                    projectName={pipelineData.intent || "WorkflowGuide Project"}
                   />
                 </div>
               )}

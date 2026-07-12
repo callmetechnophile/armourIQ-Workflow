@@ -61,15 +61,29 @@ const DASHBOARD_TABS = [
   { id: "violations",     label: "Violations",            icon: XCircle }
 ];
 
-const SUGGESTIONS = [
+const SUGGESTIONS_POOL = [
   "Voice controlled lights",
   "Solar tracker",
   "Smart greenhouse",
-  "Bionic robotic hand"
+  "Bionic robotic hand",
+  "Automated hydroponic farm",
+  "Autonomous delivery drone",
+  "Self-balancing robot",
+  "Smart weather station",
+  "Laser security system",
+  "Gesture controlled mouse",
+  "Solar powered vacuum",
+  "Smart irrigation system",
+  "IoT smart home lock",
+  "Wearable health tracker",
+  "CNC engraving machine",
+  "Autonomous lawn mower",
+  "RFID sorting conveyor"
 ];
 
 export default function Home() {
   const [intent, setIntent] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
@@ -101,6 +115,9 @@ export default function Home() {
       const count = parseInt(localStorage.getItem('armourline_guest_usage') || '0', 10);
       setUsageCount(count);
     }
+    // Shuffle pool and select 4 suggestions on mount
+    const shuffled = [...SUGGESTIONS_POOL].sort(() => 0.5 - Math.random());
+    setSuggestions(shuffled.slice(0, 4));
   }, []);
 
   const incrementUsage = () => {
@@ -731,7 +748,7 @@ ${rawBackground.trim()}
           <div className="space-y-3 mb-6">
             <span className="text-[10px] text-slate-500 font-mono tracking-widest uppercase block">SUGGESTIONS</span>
             <div className="flex flex-wrap justify-center gap-2 max-w-xl">
-              {SUGGESTIONS.map((item, i) => (
+              {suggestions.map((item, i) => (
                 <button
                   key={i}
                   onClick={() => {

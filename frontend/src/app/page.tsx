@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SignInButton, SignUpButton, Show, UserButton, useAuth } from '@clerk/nextjs';
-import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon, Sun, Presentation, X } from 'lucide-react';
+import { Search, Mic, Sparkles, Download, ShieldCheck, RefreshCw, Layers, GitBranch, BookOpen, Calendar, Key, AlertTriangle, FileText, Check, Moon, Sun, Presentation, X, Zap, Share2, Wifi, BarChart2, FlaskConical, Thermometer, ShoppingCart, Network, Users, History, MessageCircle, FolderOpen, Shield, Receipt, XCircle } from 'lucide-react';
 
 // Components
 import AgentPipeline from '@/components/AgentPipeline';
@@ -42,23 +42,23 @@ import ProcurementHeatmap from '@/components/ProcurementHeatmap';
 import GraphExplorer from '@/components/GraphExplorer';
 
 const DASHBOARD_TABS = [
-  { id: "bom", label: "BOM" },
-  { id: "power", label: "Power Analysis" },
-  { id: "dependency", label: "Dependency Graph" },
-  { id: "wiring", label: "Wiring Diagram" },
-  { id: "datasheets", label: "Datasheets" },
-  { id: "papers", label: "Research Papers" },
-  { id: "contradictions", label: "Research Conflicts" },
-  { id: "thermal", label: "Thermal Analysis" },
-  { id: "heatmap", label: "Procurement Heatmap" },
-  { id: "knowledge_graph", label: "Knowledge Graph" },
-  { id: "team_workspace", label: "Team Workspace" },
-  { id: "version_history", label: "Version History" },
-  { id: "assistant", label: "Connection Assistant" },
-  { id: "workspace", label: "Saved Workspace" },
-  { id: "delegation", label: "Delegation Scope" },
-  { id: "receipts", label: "Receipts" },
-  { id: "violations", label: "Violations" }
+  { id: "bom",            label: "BOM",                  icon: Layers },
+  { id: "power",          label: "Power Analysis",        icon: Zap },
+  { id: "dependency",     label: "Dependency Graph",      icon: Share2 },
+  { id: "wiring",         label: "Wiring Diagram",        icon: Wifi },
+  { id: "datasheets",     label: "Datasheets",            icon: FileText },
+  { id: "papers",         label: "Research Papers",       icon: BookOpen },
+  { id: "contradictions", label: "Research Conflicts",    icon: AlertTriangle },
+  { id: "thermal",        label: "Thermal Analysis",      icon: Thermometer },
+  { id: "heatmap",        label: "Procurement Heatmap",   icon: ShoppingCart },
+  { id: "knowledge_graph",label: "Knowledge Graph",       icon: Network },
+  { id: "team_workspace", label: "Team Workspace",        icon: Users },
+  { id: "version_history",label: "Version History",       icon: History },
+  { id: "assistant",      label: "Connection Assistant",  icon: MessageCircle },
+  { id: "workspace",      label: "Saved Workspace",       icon: FolderOpen },
+  { id: "delegation",     label: "Delegation Scope",      icon: Shield },
+  { id: "receipts",       label: "Receipts",              icon: Receipt },
+  { id: "violations",     label: "Violations",            icon: XCircle }
 ];
 
 const SUGGESTIONS = [
@@ -876,20 +876,25 @@ ${rawBackground.trim()}
 
           {/* Tier 1 & Tier 2 Feature Tabbed Dashboard */}
           <div className="glass-panel p-6 border border-slate-800 bg-slate-950/40 space-y-6">
-            <div className="flex border-b border-slate-800 overflow-x-auto gap-2 pb-px scrollbar-none">
-              {DASHBOARD_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveDashboardTab(tab.id)}
-                  className={`py-3 px-4 text-xs font-mono font-bold tracking-wider uppercase border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-                    activeDashboardTab === tab.id
-                      ? "border-cyan-500 text-cyan-400 font-extrabold"
-                      : "border-transparent text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            <div className="flex flex-wrap border-b border-slate-800/60">
+              {DASHBOARD_TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeDashboardTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveDashboardTab(tab.id)}
+                    className={`flex items-center gap-1.5 py-2.5 px-3.5 text-[10px] font-mono font-bold tracking-widest uppercase border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? "border-cyan-500 text-cyan-400"
+                        : "border-transparent text-slate-500 hover:text-slate-200 hover:border-slate-600"
+                    }`}
+                  >
+                    <Icon className={`w-3 h-3 flex-shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-600'}`} />
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="transition-all duration-300">
